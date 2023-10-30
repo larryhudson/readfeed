@@ -1,0 +1,31 @@
+---
+import Layout from "@src/components/Layout.astro";
+---
+
+<Layout>
+  <h1>Join waitlist</h1>
+
+  <p>
+    readfeed is in the private alpha stage. If you would like to join, please
+    fill out the form below.
+  </p>
+
+  <form method="POST" hx-post="/htmx/join-waitlist/" hx-swap="outerHTML">
+    <label
+      >Name
+      <input type="text" name="name" />
+    </label>
+
+    <label
+      >Email
+      <input type="email" name="email" />
+    </label>
+
+    <label
+      >Why you're interested
+      <textarea name="why"></textarea>
+    </label>
+
+    <button>Submit</button>
+  </form>
+</Layout>

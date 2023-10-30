@@ -1,0 +1,32 @@
+---
+import { addUserToWaitlist } from "@src/waitlist";
+export const partial = true;
+
+if (Astro.request.method !== "POST") {
+  return new Response("Method not allowed", { status: 405 });
+}
+
+const formData = await Astro.request.formData();
+const name = formData.get("name") as string;
+const email = formData.get("email") as string;
+const whyInterested = formData.get("why") as string;
+
+const waitlistUser = await addUserToWaitlist({
+  name,
+  email,
+  whyInterested,
+});
+
+// TODO: enqueue background task for sending an email notification to admin
+---
+
+<p>
+  Thank you for your interest! You have been added to the waitlist. We will send
+  you an email when you can join.
+</p>
+
+<style>
+  p {
+    border: 2px solid gold;
+  }
+</style>
