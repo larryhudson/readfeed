@@ -1,0 +1,23 @@
+---
+import { sendInvitation } from "@src/waitlist";
+export const partial = true;
+
+if (Astro.request.method !== "POST") {
+  return new Response("Method not allowed", { status: 405 });
+}
+
+const formData = await Astro.request.formData();
+const name = formData.get("name") as string;
+const email = formData.get("email") as string;
+const message = formData.get("message") as string;
+
+const invitation = await sendInvitation({
+  name,
+  email,
+  message,
+});
+---
+
+<p>
+Successfully invited user. You can <a href="/admin/waitlist">go back to the waitlist</a>.</p>
+</p>

@@ -1,0 +1,19 @@
+---
+import Layout from "@src/components/Layout.astro";
+import Dump from "@src/components/Dump.astro";
+
+import { getInvitationFromInviteCode } from "@src/waitlist";
+
+const inviteCode = Astro.url.searchParams.get("invite-code");
+const invitation = await getInvitationFromInviteCode(inviteCode);
+
+if (!invitation) {
+  return Astro.redirect("/auth/join-waitlist/");
+}
+---
+
+<Layout>
+  <h1>Register</h1>
+
+  <Dump data={invitation} />
+</Layout>

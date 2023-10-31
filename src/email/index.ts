@@ -45,7 +45,13 @@ export async function sendEmail({
   subject: string;
   body: string;
 }) {
-  const mailgunResponse = await sendWithMailgun({ to, subject, body });
+  console.log("Sending email");
+  console.log("to", to);
+  console.log("subject:", subject);
+  console.log("body");
+  console.log(body);
+  return null;
+  // const mailgunResponse = await sendWithMailgun({ to, subject, body });
 
   return mailgunResponse;
 }

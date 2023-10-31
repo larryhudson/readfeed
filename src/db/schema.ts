@@ -41,3 +41,4 @@ export const users = sqliteTable("users", {
 
 export type User = InferSelectModel<typeof users>;
 export type WaitlistUser = InferSelectModel<typeof waitlistUsers>;
+export type WaitlistInvitation = InferSelectModel<typeof waitlistInvitations>;

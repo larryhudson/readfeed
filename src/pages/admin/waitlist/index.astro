@@ -1,0 +1,35 @@
+---
+import Layout from "@src/components/Layout.astro"
+import Dump from "@src/components/Dump.astro";
+import {getWaitlistUsers} from "@src/waitlist"
+
+const waitlistUsers = await getWaitlistUsers();
+
+---
+
+<Layout>
+  <h1>Admin waitlist</h1>
+  <p>These users are on the waitlist.</p>
+
+  <ul>
+    {waitlistUsers.map((user) => (
+    <li>
+      <dl>
+        <dt>Name</dt>
+        <dd>{user.name}</dd>
+        <dt>Email</dt>
+        <dd>{user.email}</dd>
+        <dt>Why interested</dt>
+        <dd>{user.whyInterested}</dd>
+        <dt>Created at</dt>
+        <dd>{user.createdAt}</dd>
+      </dl>
+      <a href={`/admin/waitlist/${user.id}/invite/`}>Invite</a>
+      </li>
+    ))}
+
+
+
+  <Dump data={waitlistUsers} />
+
+</Layout>

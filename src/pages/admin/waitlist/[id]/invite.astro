@@ -1,0 +1,34 @@
+---
+import Layout from "@src/components/Layout.astro";
+import Dump from "@src/components/Dump.astro";
+import { getWaitlistUserById } from "@src/waitlist";
+
+const waitlistUserId = Astro.params.id;
+const waitlistUser = await getWaitlistUserById(waitlistUserId);
+---
+
+<Layout>
+  <h1>Send invitation to user</h1>
+
+  <form hx-post="/htmx/admin/send-invitation/">
+    <label
+      >To name:
+      <input type="text" name="name" value={waitlistUser.name} />
+    </label>
+
+    <label
+      >To email:
+      <input type="text" name="email" value={waitlistUser.email} />
+    </label>
+
+    <label
+      >Message:
+      <textarea name="message" rows="5" cols="40"> </textarea>
+    </label>
+
+    <input type="hidden" name="waitlistUserId" value={waitlistUserId} />
+    <button type="submit">Send invitation</button>
+  </form>
+
+  <Dump data={waitlistUser} />
+</Layout>

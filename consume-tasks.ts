@@ -1,8 +1,10 @@
 import { Worker } from "bullmq";
-import { processNote } from "./background-tasks/process-note.js";
+import { notifyAdminNewWaitlistUser } from "./background-tasks/notify-admin-new-waitlist-user.js";
+import { sendInvitationEmail } from "./background-tasks/send-invitation.js";
 
 const handlers = {
-  processNote,
+  notifyAdminNewWaitlistUser,
+  sendInvitationEmail,
 };
 
 function handleJob(job) {
