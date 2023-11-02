@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
@@ -37,6 +37,50 @@ export const users = sqliteTable("users", {
     sql`CURRENT_TIMESTAMP`,
   ),
   isAdmin: integer("is_admin", { mode: "boolean" }).default(false),
+});
+
+export const sessions = sqliteTable("user_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  activeExpires: blob("active_expires", {
+    mode: "bigint",
+  }).notNull(),
+  idleExpires: blob("idle_expires", {
+    mode: "bigint",
+  }).notNull(),
+});
+
+export const keys = sqliteTable("user_keys", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  hashedPassword: text("hashed_password"),
+});
+
+export const emailVerificationTokens = sqliteTable(
+  "email_verification_tokens",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    expires: blob("expires", {
+      mode: "bigint",
+    }).notNull(),
+  },
+);
+
+export const passwordResetTokens = sqliteTable("password_reset_tokens", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  expires: blob("expires", {
+    mode: "bigint",
+  }).notNull(),
 });
 
 export type User = InferSelectModel<typeof users>;
