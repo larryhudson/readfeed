@@ -1,5 +1,4 @@
-import { auth } from "../lib/lucia";
-
+import { auth } from "@src/auth/lucia";
 import type { APIRoute } from "astro";
 
 export const post: APIRoute = async (context) => {
