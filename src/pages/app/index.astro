@@ -1,0 +1,10 @@
+---
+import Layout from "@src/components/Layout.astro";
+import { Debug } from "astro:components";
+
+const session = await Astro.locals.auth.validate();
+---
+
+<Layout>
+  <Debug {session} />
+</Layout>

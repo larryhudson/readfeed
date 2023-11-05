@@ -3,11 +3,10 @@ import Layout from "@src/components/Layout.astro";
 import Dump from "@src/components/Dump.astro";
 
 // copied from Lucia example: https://github.com/lucia-auth/examples/blob/main/astro/email-and-password/src/pages/signup.astro
-import { isValidEmail, sendEmailVerificationLink } from "../lib/email";
+import { isValidEmail } from "@src/auth/email";
 
-import { auth } from "../lib/lucia";
+import { auth } from "@src/auth/lucia";
 import { SqliteError } from "better-sqlite3";
-import { generateEmailVerificationToken } from "../lib/token";
 
 import { getInvitationFromInviteCode } from "@src/waitlist";
 
@@ -18,13 +17,22 @@ if (!invitation) {
   return Astro.redirect("/auth/join-waitlist/");
 }
 
+let nameInput = "";
 let emailInput = "";
 let errorMessage = "";
 
 // check for form submissions
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
+  const name = formData.get("name");
+  if (typeof name === "string") {
+    nameInput = name;
+  }
+
   const email = formData.get("email");
+  const { ADMIN_EMAIL } = import.meta.env;
+  const isAdminEmail = email === ADMIN_EMAIL;
+
   const password = formData.get("password");
   if (typeof email === "string") {
     emailInput = email;
@@ -43,8 +51,9 @@ if (Astro.request.method === "POST") {
           password, // hashed by Lucia
         },
         attributes: {
+          name,
           email,
-          email_verified: Number(false),
+          is_admin: isAdminEmail ? 1 : 0,
         },
       });
       const session = await auth.createSession({
@@ -52,9 +61,11 @@ if (Astro.request.method === "POST") {
         attributes: {},
       });
       Astro.locals.auth.setSession(session); // set session cookie
-      const token = await generateEmailVerificationToken(user.userId);
-      await sendEmailVerificationLink(token);
-      return Astro.redirect("/email-verification", 302);
+      if (isAdminEmail) {
+        return Astro.redirect("/admin/");
+      } else {
+        return Astro.redirect("/auth/waiting-room/", 302);
+      }
     } catch (e) {
       // this part depends on the database you're using
       // check for unique constraint error in user table
@@ -62,6 +73,7 @@ if (Astro.request.method === "POST") {
         errorMessage = "Account already exists";
         Astro.response.status = 400;
       } else {
+        console.log(e);
         errorMessage = "An unknown error occurred";
         Astro.response.status = 500;
       }
@@ -74,10 +86,10 @@ if (Astro.request.method === "POST") {
 
 const session = await Astro.locals.auth.validate();
 if (session) {
-  if (!session.user.emailVerified) {
-    return Astro.redirect("/email-verification");
+  if (!session.user.isApproved) {
+    return Astro.redirect("/auth/waiting-room/");
   }
-  return Astro.redirect("/");
+  return Astro.redirect("/app/");
 }
 ---
 
@@ -85,6 +97,8 @@ if (session) {
   <h1>Register</h1>
 
   <form method="post">
+    <label for="name">Name</label>
+    <input name="name" id="name" value={nameInput} /><br />
     <label for="email">Email</label>
     <input name="email" id="email" value={emailInput} /><br />
     <label for="password">Password</label>
@@ -92,6 +106,6 @@ if (session) {
     <input type="submit" />
   </form>
   <p class="error">{errorMessage}</p>
-  <a href="/login">Sign in</a>
+  <a href="/auth/login/">Sign in</a>
   <Dump data={invitation} />
 </Layout>

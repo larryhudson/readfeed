@@ -1,0 +1,8 @@
+---
+import { createSuperuser } from "@src/auth/create-superuser";
+import { Debug } from "astro/components";
+
+const user = await createSuperuser();
+---
+
+<Debug data={user} />

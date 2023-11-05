@@ -1,0 +1,11 @@
+---
+import { getUsers } from "@src/auth";
+import Layout from "@src/components/Layout.astro";
+import { Debug } from "astro:components";
+
+const users = await getUsers();
+---
+
+<Layout>
+  <Debug {users} />
+</Layout>

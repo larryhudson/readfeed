@@ -13,8 +13,9 @@ export const auth = lucia({
   env: import.meta.env.DEV ? "DEV" : "PROD",
   getUserAttributes: (data) => {
     return {
+      name: data.name,
       email: data.email,
-      emailVerified: Boolean(data.email_verified),
+      isAdmin: Boolean(data.is_admin),
     };
   },
 });

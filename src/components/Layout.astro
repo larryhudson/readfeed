@@ -1,5 +1,6 @@
 ---
 import { getStatusMessage } from "@src/utils/status-messages";
+import LoginLogout from "@src/components/LoginLogout.astro";
 import HtmxPath from "htmx.org/dist/htmx.min.js?url";
 
 const title = Astro.props.title || "Astro";
@@ -21,6 +22,7 @@ const statusMessage = getStatusMessage(statusId);
     <header>
       {statusMessage && <p>{statusMessage}</p>}
       <h1>readfeed</h1>
+      <LoginLogout />
     </header>
     <main>
       <slot />
@@ -52,4 +54,4 @@ const statusMessage = getStatusMessage(statusId);
     display: block;
     width: 100%;
   }
-  </style>
+</style>

@@ -1,10 +1,16 @@
 ---
-import Layout from "@src/components/Layout.astro"
+import Layout from "@src/components/Layout.astro";
 import Dump from "@src/components/Dump.astro";
-import {getWaitlistUsers} from "@src/waitlist"
+import { Debug } from "astro:components";
+import { getWaitlistUsers, getWaitlistInvitations } from "@src/waitlist";
+
+const session = await Astro.locals.auth.validate();
+if (!session || !session.user.isAdmin) {
+  return Astro.redirect("/app/");
+}
 
 const waitlistUsers = await getWaitlistUsers();
-
+const waitlistInvitations = await getWaitlistInvitations();
 ---
 
 <Layout>
@@ -12,24 +18,26 @@ const waitlistUsers = await getWaitlistUsers();
   <p>These users are on the waitlist.</p>
 
   <ul>
-    {waitlistUsers.map((user) => (
-    <li>
-      <dl>
-        <dt>Name</dt>
-        <dd>{user.name}</dd>
-        <dt>Email</dt>
-        <dd>{user.email}</dd>
-        <dt>Why interested</dt>
-        <dd>{user.whyInterested}</dd>
-        <dt>Created at</dt>
-        <dd>{user.createdAt}</dd>
-      </dl>
-      <a href={`/admin/waitlist/${user.id}/invite/`}>Invite</a>
-      </li>
-    ))}
+    {
+      waitlistUsers.map((user) => (
+        <li>
+          <dl>
+            <dt>Name</dt>
+            <dd>{user.name}</dd>
+            <dt>Email</dt>
+            <dd>{user.email}</dd>
+            <dt>Why interested</dt>
+            <dd>{user.whyInterested}</dd>
+            <dt>Created at</dt>
+            <dd>{user.createdAt}</dd>
+          </dl>
+          <a href={`/admin/waitlist/${user.id}/invite/`}>Invite</a>
+        </li>
+      ))
+    }
+  </ul>
+  <Debug {waitlistUsers} />
 
-
-
-  <Dump data={waitlistUsers} />
-
+  <h2>Invitations</h2>
+  <Debug {waitlistInvitations} />
 </Layout>

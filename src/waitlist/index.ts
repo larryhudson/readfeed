@@ -62,6 +62,12 @@ export async function getWaitlistUsers() {
   return users;
 }
 
+export async function getWaitlistInvitations() {
+  const invitations = await db.select().from(waitlistInvitations);
+
+  return invitations;
+}
+
 export async function getWaitlistUserById(id: number) {
   const users = await db
     .select()
@@ -134,7 +140,7 @@ export async function sendInvitation({
   const invitation = createdInvitations[0] as WaitlistInvitation;
 
   // add a task to the queue, to send the invite email to the user
-  const email = await sendInviteEmail(invitation);
+  const sentEmail = await sendInviteEmail(invitation);
 
   return invitation;
 }
