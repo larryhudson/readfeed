@@ -1,9 +1,9 @@
 import { db } from "@src/db";
 import { waitlistUsers } from "@src/db/schema";
 import { eq } from "drizzle-orm";
-import { notifyAdminAboutNewWaitlistUser } from "@src/waitlist/index.js";
+import { notifyAdminAboutNewWaitlistUser } from "@src/waitlist";
 
-export async function notifyAdminNewWaitlistUser({ waitlistUserId }) {
+export default async function notifyAdminNewWaitlistUser({ waitlistUserId }) {
   const waitlistUserResults = await db
     .select()
     .from(waitlistUsers)

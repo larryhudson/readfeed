@@ -1,7 +1,7 @@
 import { db } from "@src/db";
 import { waitlistInvitations } from "@src/db/schema";
 import { eq } from "drizzle-orm";
-import { sendInviteEmail } from "@src/waitlist/index.js";
+import { sendInviteEmail } from "@src/waitlist";
 
 export async function sendInvitationEmail({ invitationId }) {
   const invitations = await db

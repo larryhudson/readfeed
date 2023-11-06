@@ -3,8 +3,11 @@ import { waitlistUsers, waitlistInvitations } from "@src/db/schema";
 import type { WaitlistUser, WaitlistInvitation } from "@src/db/schema";
 import { sendEmail } from "@src/email";
 import { eq } from "drizzle-orm";
+import { addTaskToQueue } from "@src/background-queue";
 
-async function notifyAdminAboutNewWaitlistUser(waitlistUser: WaitlistUser) {
+export async function notifyAdminAboutNewWaitlistUser(
+  waitlistUser: WaitlistUser,
+) {
   console.log("Notifying admin about new waitlist user");
   // return;
   const sitePublicUrl = import.meta.env.PUBLIC_URL || "http://localhost:4321";
@@ -101,7 +104,10 @@ export async function addUserToWaitlist({
   const waitlistUser = createdUsers[0] as WaitlistUser;
 
   // add a task to the queue, to send an email to the admin
-  await notifyAdminAboutNewWaitlistUser(waitlistUser);
+  await addTaskToQueue({
+    taskName: "notifyAdminNewWaitlistUser",
+    taskData: waitlistUser,
+  });
 
   return waitlistUser;
 }
@@ -140,7 +146,10 @@ export async function sendInvitation({
   const invitation = createdInvitations[0] as WaitlistInvitation;
 
   // add a task to the queue, to send the invite email to the user
-  const sentEmail = await sendInviteEmail(invitation);
+  await addTaskToQueue({
+    taskName: "sendInvitationEmail",
+    taskData: invitation,
+  });
 
   return invitation;
 }

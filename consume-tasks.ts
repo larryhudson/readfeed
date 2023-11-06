@@ -1,4 +1,5 @@
 import { Worker } from "bullmq";
+import type { Job } from "bullmq";
 import { notifyAdminNewWaitlistUser } from "./background-tasks/notify-admin-new-waitlist-user.js";
 import { sendInvitationEmail } from "./background-tasks/send-invitation.js";
 
@@ -7,7 +8,7 @@ const handlers = {
   sendInvitationEmail,
 };
 
-function handleJob(job) {
+function handleJob(job: Job) {
   const handler = handlers[job.name];
 
   if (!handler) {
@@ -27,6 +28,10 @@ const redisOptions = {
 };
 
 const worker = new Worker("taskQueue", handleJob, redisOptions);
+
+worker.on("ready", () => {
+  console.log("Worker is ready");
+});
 
 worker.on("active", (job) => {
   console.log(`${job.id} has started!`);
