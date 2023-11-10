@@ -10,7 +10,7 @@ const waitlistUser = await getWaitlistUserById(waitlistUserId);
 <Layout>
   <h1>Send invitation to user</h1>
 
-  <form hx-post="/htmx/admin/send-invitation/">
+  <form hx-post="/admin/waitlist/x-send-invitation/">
     <label
       >To name:
       <input type="text" name="name" value={waitlistUser.name} />
