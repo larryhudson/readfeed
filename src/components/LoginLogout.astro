@@ -1,6 +1,4 @@
 ---
-import {Debug} from "astro:components";
-
 const session = await Astro.locals.auth.validate();
 const isLoggedIn = session && session.user;
 ---
@@ -9,7 +7,6 @@ const isLoggedIn = session && session.user;
   isLoggedIn ? (
     <div>
       <p>Logged in as {session.user.email}</p>
-      <Debug {session} />
       <form method="POST" action="/auth/logout">
         <button>Logout</button>
       </form>

@@ -1,12 +1,10 @@
 ---
-import { getStatusMessage } from "@src/utils/status-messages";
 import LoginLogout from "@src/components/LoginLogout.astro";
 import HtmxPath from "htmx.org/dist/htmx.min.js?url";
+import HyperscriptPath from "hyperscript.org/dist/_hyperscript.min.js?url";
 
 const title = Astro.props.title || "Astro";
 const statusId = Astro.url.searchParams.get("status");
-
-const statusMessage = getStatusMessage(statusId);
 ---
 
 <html lang="en">
@@ -17,10 +15,10 @@ const statusMessage = getStatusMessage(statusId);
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <script is:inline src={HtmxPath}></script>
+    <script is:inline src={HyperscriptPath}></script>
   </head>
   <body>
     <header>
-      {statusMessage && <p>{statusMessage}</p>}
       <h1>readfeed</h1>
       <LoginLogout />
     </header>

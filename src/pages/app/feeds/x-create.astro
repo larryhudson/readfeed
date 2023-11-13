@@ -1,0 +1,34 @@
+---
+export const partial = true;
+
+import { db } from "@src/db";
+import { feeds } from "@src/db/schema";
+
+if (Astro.request.method !== "POST") {
+  return new Response(null, {
+    status: 405,
+    statusText: "Method not allowed",
+  });
+}
+
+const formData = await Astro.request.formData();
+
+const name = formData.get("name");
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+async function createFeed({ name, userId }) {
+  const createdFeeds = await db
+    .insert(feeds)
+    .values({ name, userId })
+    .returning();
+  return createdFeeds[0];
+}
+
+const newFeed = await createFeed({ name, userId });
+console.log({ newFeed });
+---
+
+<li>
+  <a href={`/feeds/${newFeed.id}`}>{newFeed.name}</a>
+</li>

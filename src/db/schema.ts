@@ -59,6 +59,15 @@ export const keys = sqliteTable("user_keys", {
   hashedPassword: text("hashed_password"),
 });
 
+export const feeds = sqliteTable("feeds", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+    sql`CURRENT_TIMESTAMP`,
+  ),
+  userId: text("user_id").references(() => users.id),
+});
+
 export type User = InferSelectModel<typeof users>;
 export type WaitlistUser = InferSelectModel<typeof waitlistUsers>;
 export type WaitlistInvitation = InferSelectModel<typeof waitlistInvitations>;
