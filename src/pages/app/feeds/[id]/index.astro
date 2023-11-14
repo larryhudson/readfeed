@@ -1,0 +1,45 @@
+---
+import Layout from "@src/components/Layout.astro";
+import { Debug } from "astro:components";
+import { getFeedByIdForUser } from "@src/feeds";
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+const feedId = Astro.params.id;
+const feed = await getFeedByIdForUser(userId, feedId);
+---
+
+<Layout>
+  <h1>Feed: {feed.name}</h1>
+  <h2>Manage feed</h2>
+  <button>Delete</button>
+  <button>Rename</button>
+  <details>
+    <summary>Add to podcast app</summary>
+    <div>
+      <p>Copy the podcast URL:</p>
+      <textarea id="copy-url" readonly>TODO: implement feed URLs</textarea>
+
+      <p>
+        <a href="https://transistor.fm/add-podcast/"
+          >Follow these instructions to add the podcast to your preferred app</a
+        >.
+      </p>
+    </div>
+  </details>
+  <h2>Episodes</h2>
+  <p>
+    <a href={`/app/content-items/new?feed-id=${feedId}`}
+      >Add a new content item</a
+    >
+  </p>
+  <Debug {feed} />
+</Layout>
+
+<style>
+  details {
+    border: 2px solid black;
+    padding: 1rem;
+  }
+</style>

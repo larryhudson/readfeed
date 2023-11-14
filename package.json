@@ -13,15 +13,24 @@
   },
   "dependencies": {
     "@astrojs/node": "^6.0.3",
+    "@extractus/article-extractor": "^8.0.3",
     "@lucia-auth/adapter-sqlite": "^2.0.1",
+    "article-title": "^4.1.0",
     "astro": "^3.4.0",
     "better-sqlite3": "^9.0.0",
     "bullmq": "^4.12.7",
+    "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.3.1",
     "drizzle-orm": "^0.28.6",
+    "get-audio-duration": "^4.0.1",
+    "html-entities": "^2.4.0",
+    "html-to-text": "^9.0.5",
     "htmx.org": "^1.9.6",
     "hyperscript.org": "^0.9.12",
-    "lucia": "^2.7.3"
+    "js-md5": "^0.8.3",
+    "lucia": "^2.7.3",
+    "marked": "^10.0.0",
+    "p-map": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.8.10",

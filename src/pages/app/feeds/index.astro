@@ -1,23 +1,11 @@
 ---
 import Layout from "@src/components/Layout.astro";
-import { db } from "@src/db";
-import { feeds as feedsTable } from "@src/db/schema";
-import { eq } from "drizzle-orm";
+import { getFeedsForUser } from "@src/feeds";
 
 const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
 
-async function getFeeds() {
-  const userId = session.user.userId;
-
-  const feeds = await db
-    .select()
-    .from(feedsTable)
-    .where(eq(feedsTable.userId, userId));
-
-  return feeds;
-}
-
-const feeds = await getFeeds();
+const feeds = await getFeedsForUser(userId);
 ---
 
 <Layout>

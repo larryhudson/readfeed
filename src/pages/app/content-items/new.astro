@@ -1,0 +1,38 @@
+---
+import Layout from "@src/components/Layout.astro";
+import { Debug } from "astro:components";
+import { getFeedsForUser } from "@src/feeds";
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+const feedIdStr = Astro.url.searchParams.get("feed-id");
+const feedId = feedIdStr ? parseInt(feedIdStr) : null;
+
+const feeds = await getFeedsForUser(userId);
+---
+
+<Layout>
+  <h1>Add a new content item</h1>
+
+  <form action="/app/content-items/x-create" method="POST">
+    <label for="feed">Feed</label>
+    <select id="feed" name="feed-id">
+      {
+        feeds.map((feed) => (
+          <option
+            value={feed.id}
+            selected={feed.id === feedId ? "" : undefined}
+          >
+            {feed.name}
+          </option>
+        ))
+      }
+    </select>
+
+    <label for="url">URL</label>
+    <input type="url" name="url" id="url" />
+
+    <button>Add</button>
+  </form>
+</Layout>

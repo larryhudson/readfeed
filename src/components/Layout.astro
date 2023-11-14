@@ -1,10 +1,14 @@
 ---
 import LoginLogout from "@src/components/LoginLogout.astro";
+import AppNavigation from "@src/components/AppNavigation.astro";
+
 import HtmxPath from "htmx.org/dist/htmx.min.js?url";
 import HyperscriptPath from "hyperscript.org/dist/_hyperscript.min.js?url";
 
 const title = Astro.props.title || "Astro";
-const statusId = Astro.url.searchParams.get("status");
+
+const session = await Astro.locals.auth.validate();
+const isLoggedIn = session !== null;
 ---
 
 <html lang="en">
@@ -21,6 +25,7 @@ const statusId = Astro.url.searchParams.get("status");
     <header>
       <h1>readfeed</h1>
       <LoginLogout />
+      {isLoggedIn && <AppNavigation />}
     </header>
     <main>
       <slot />
