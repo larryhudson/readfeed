@@ -41,7 +41,7 @@ function convertHtmlToText(html) {
   return text;
 }
 
-export async function getTextFromUrl(url) {
+export async function getTextPartsFromUrl(url) {
   const article = await extract(url);
 
   const thisArticleTitle = article.title;
@@ -57,11 +57,40 @@ export async function getTextFromUrl(url) {
 
   $(selectorsToRemove).remove();
 
-  const processedHtml = $.html();
+  const numberOfH1s = $("h1").length;
 
-  const text = convertHtmlToText(processedHtml);
+  const chapterHeadingSelector = numberOfH1s > 1 ? "h1" : "h2";
+  console.log({ chapterHeadingSelector });
 
-  return text;
+  const firstTagIsHeading = $("body")
+    .children()
+    .first()
+    .is(chapterHeadingSelector);
+
+  if (!firstTagIsHeading) {
+    $("body").prepend(
+      `<${chapterHeadingSelector}>${thisArticleTitle}</${chapterHeadingSelector}>`,
+    );
+  }
+
+  const articleChapters = $(chapterHeadingSelector)
+    .map((headingIndex, headingTag) => {
+      const contentTags = $(headingTag).nextUntil(chapterHeadingSelector);
+
+      const contentHtml = $.html(contentTags).trim();
+
+      const chapterTitle = $(headingTag).text().trim();
+
+      const chapterText = convertHtmlToText(contentHtml);
+
+      return {
+        title: chapterTitle,
+        text: chapterText,
+      };
+    })
+    .get();
+
+  return articleChapters;
 }
 
 export async function extractArticle(url) {

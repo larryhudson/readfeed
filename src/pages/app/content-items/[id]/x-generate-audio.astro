@@ -1,0 +1,27 @@
+---
+import { getContentItemById, updateContentItem } from "@src/content-items";
+import { addTaskToQueue } from "@src/background-queue";
+
+const contentItemIdStr = Astro.params.id;
+const contentItemId = parseInt(contentItemIdStr, 10);
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+const contentItem = await getContentItemById(contentItemId);
+if (contentItem.userId !== userId) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const backgroundTask = await addTaskToQueue({
+  taskName: "generateAudioForContentItem",
+  taskData: {
+    contentItemId,
+  },
+});
+
+// add text to content item
+await updateContentItem(contentItemId, { textContent });
+---
+
+<div>{textContent}</div>

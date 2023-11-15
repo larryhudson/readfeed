@@ -74,6 +74,39 @@ export const contentItems = sqliteTable("content_items", {
   url: text("url").notNull(),
   title: text("title"),
   textContent: text("text_content"),
+  type: text("type").notNull().default("webpage"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+    sql`CURRENT_TIMESTAMP`,
+  ),
+});
+
+export const contentParts = sqliteTable("content_parts", {
+  id: integer("id").primaryKey(),
+  contentItemId: integer("content_item_id").references(() => contentItems.id),
+  title: text("title"),
+  text: text("text"),
+  order: integer("order"),
+});
+
+export const audioItems = sqliteTable("audio_items", {
+  id: integer("id").primaryKey(),
+  audioFileId: integer("audio_file_id").references(() => audioFiles.id),
+  title: text("title"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+    sql`CURRENT_TIMESTAMP`,
+  ),
+});
+
+export const audioFiles = sqliteTable("audio_files", {
+  id: integer("id").primaryKey(),
+  url: text("url").notNull(),
+  title: text("title"),
+  durationMs: integer("duration_ms"),
+  duration: text("duration"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+    sql`CURRENT_TIMESTAMP`,
+  ),
+  filePath: text("file_path"),
 });
 
 export type User = InferSelectModel<typeof users>;
