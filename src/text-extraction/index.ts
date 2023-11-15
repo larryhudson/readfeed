@@ -7,8 +7,6 @@ import { parse as markedParse } from "marked";
 import articleTitle from "article-title";
 import pMap from "p-map";
 
-import { getExtractionRulesForDomain } from "./db.js";
-
 function convertHtmlToText(html) {
   const text = convert(html, {
     wordwrap: 0,
@@ -43,46 +41,33 @@ function convertHtmlToText(html) {
   return text;
 }
 
-export async function extractArticle(url) {
-  const domain = new URL(url).hostname;
-
-  const globalRules = getExtractionRulesForDomain(null);
-  const globalSelectorsToRemove = globalRules
-    .filter((rule) => rule.rule_type === "delete_selector")
-    .map((rule) => rule.content);
-  const domainRules = getExtractionRulesForDomain(domain);
-  const domainSelectorsToRemove = domainRules
-    .filter((rule) => rule.rule_type === "delete_selector")
-    .map((rule) => rule.content);
-
-  console.log({ globalSelectorsToRemove, domainSelectorsToRemove });
-
-  function removeSelectors(document, selectors) {
-    selectors.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((elem) => {
-        elem.parentNode.removeChild(elem);
-      });
-    });
-
-    return document;
-  }
-
-  addTransformations({
-    patterns: [/./],
-    pre: (document) => removeSelectors(document, globalSelectorsToRemove),
-  });
-
-  const domainRegex = new RegExp(`([\\w]+.)?${domain.replace(/\./g, "\\.")}/?`);
-
-  addTransformations({
-    patterns: [domainRegex],
-    pre: (document) => removeSelectors(document, domainSelectorsToRemove),
-  });
-
+export async function getTextFromUrl(url) {
   const article = await extract(url);
 
   const thisArticleTitle = article.title;
-  console.log({ thisArticleTitle });
+  const articleHtml = article.content;
+
+  const $ = cheerio.load(articleHtml);
+
+  $("div").each((_, divTag) => {
+    $(divTag).replaceWith($(divTag).contents());
+  });
+
+  const selectorsToRemove = "img, figure";
+
+  $(selectorsToRemove).remove();
+
+  const processedHtml = $.html();
+
+  const text = convertHtmlToText(processedHtml);
+
+  return text;
+}
+
+export async function extractArticle(url) {
+  const article = await extract(url);
+
+  const thisArticleTitle = article.title;
   const articleHtml = article.content;
 
   const tmpHtmlPath = "./tmp-html.html";
@@ -110,36 +95,6 @@ export async function extractArticle(url) {
     );
   }
 
-  async function getRelatedLinkInfo(aTag) {
-    let title = "";
-    const href = $(aTag).attr("href");
-    try {
-      const linkResponse = await fetch(href);
-      const linkHtml = await linkResponse.text();
-      title = articleTitle(linkHtml);
-    } catch (e) {
-      console.log("Error fetching this URL HTML");
-      console.log(href);
-      console.log(e);
-    }
-
-    const contextQuote = $(aTag).closest("p,li").text().trim();
-
-    return {
-      url: href,
-      title,
-      contextQuote,
-    };
-  }
-
-  const linkTags = $("a");
-  const relatedLinks = await pMap(linkTags, getRelatedLinkInfo, {
-    concurrency: 2,
-  });
-
-  console.log("Related links:");
-  console.log(relatedLinks);
-
   const articleChapters = $(chapterHeadingSelector)
     .map((headingIndex, headingTag) => {
       const contentTags = $(headingTag).nextUntil(chapterHeadingSelector);
@@ -164,7 +119,6 @@ export async function extractArticle(url) {
   console.log(articleChapters);
   return {
     articleChapters,
-    relatedLinks,
   };
 }
 

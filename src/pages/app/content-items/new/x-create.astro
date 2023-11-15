@@ -1,0 +1,33 @@
+---
+import { getFeedByIdForUser } from "@src/feeds";
+import { createContentItem } from "@src/content-items";
+
+await new Promise((resolve) => setTimeout(resolve, 1000));
+
+const formData = await Astro.request.formData();
+const url = formData.get("url");
+const title = formData.get("title");
+const feedIdStr = formData.get("feed-id");
+const feedId = parseInt(feedIdStr, 10);
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+// check feed belongs to user
+const feed = await getFeedByIdForUser(userId, feedId);
+
+if (!feed) {
+  return new Response("Couldn't find a feed with that ID", {
+    status: 404,
+  });
+}
+
+// create the content item
+const contentItem = await createContentItem({
+  feedId,
+  url,
+  title,
+});
+
+return Astro.redirect(`/app/content-items/${contentItem.id}/`);
+---

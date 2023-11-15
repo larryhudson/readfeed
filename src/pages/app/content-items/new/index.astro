@@ -1,5 +1,6 @@
 ---
 import Layout from "@src/components/Layout.astro";
+import DotSpinner from "@src/components/DotSpinner.astro";
 import { Debug } from "astro:components";
 import { getFeedsForUser } from "@src/feeds";
 
@@ -15,7 +16,7 @@ const feeds = await getFeedsForUser(userId);
 <Layout>
   <h1>Add a new content item</h1>
 
-  <form action="/app/content-items/x-create" method="POST">
+  <form action="/app/content-items/new/x-create" method="POST">
     <label for="feed">Feed</label>
     <select id="feed" name="feed-id">
       {
@@ -33,6 +34,37 @@ const feeds = await getFeedsForUser(userId);
     <label for="url">URL</label>
     <input type="url" name="url" id="url" />
 
+    <button
+      hx-post="/app/content-items/new/x-autofill-form"
+      hx-include="closest form"
+      hx-target="#autofill"
+      hx-swap="outerHTML">Autofill</button
+    >
+    <div class="svg-container"><DotSpinner /></div>
+
+    <div id="autofill">
+      <label for="title">Title</label>
+      <input type="text" name="title" id="title" />
+    </div>
+
     <button>Add</button>
   </form>
+
+  <style is:global>
+    button + .svg-container {
+      display: none;
+    }
+    .htmx-request + .svg-container {
+      display: inline;
+    }
+
+    .svg-container svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+    }
+  </style>
 </Layout>

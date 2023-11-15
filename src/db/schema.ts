@@ -68,6 +68,16 @@ export const feeds = sqliteTable("feeds", {
   userId: text("user_id").references(() => users.id),
 });
 
+export const contentItems = sqliteTable("content_items", {
+  id: integer("id").primaryKey(),
+  feedId: integer("feed_id").references(() => feeds.id),
+  url: text("url").notNull(),
+  title: text("title"),
+  textContent: text("text_content"),
+});
+
 export type User = InferSelectModel<typeof users>;
 export type WaitlistUser = InferSelectModel<typeof waitlistUsers>;
 export type WaitlistInvitation = InferSelectModel<typeof waitlistInvitations>;
+export type Feed = InferSelectModel<typeof feeds>;
+export type ContentItem = InferSelectModel<typeof contentItems>;

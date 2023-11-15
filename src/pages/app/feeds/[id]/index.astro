@@ -2,12 +2,19 @@
 import Layout from "@src/components/Layout.astro";
 import { Debug } from "astro:components";
 import { getFeedByIdForUser } from "@src/feeds";
+import { getContentItemsForFeed } from "@src/content-items";
 
 const session = await Astro.locals.auth.validate();
 const userId = session.user.userId;
 
 const feedId = Astro.params.id;
 const feed = await getFeedByIdForUser(userId, feedId);
+
+if (!feed) {
+  return new Response("Not found", { status: 404 });
+}
+
+const episodes = await getContentItemsForFeed(feed.id);
 ---
 
 <Layout>
@@ -34,6 +41,17 @@ const feed = await getFeedByIdForUser(userId, feedId);
       >Add a new content item</a
     >
   </p>
+  <ul>
+    {
+      episodes.map((episode) => (
+        <li>
+          <a href={`/app/content-items/${episode.id}/`}>{episode.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <Debug {episodes} />
   <Debug {feed} />
 </Layout>
 
