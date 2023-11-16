@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
 export const waitlistUsers = sqliteTable("waitlist_users", {
@@ -74,18 +74,53 @@ export const contentItems = sqliteTable("content_items", {
   url: text("url").notNull(),
   title: text("title"),
   textContent: text("text_content"),
+  documentFileId: integer("document_file_id").references(
+    () => documentFiles.id,
+  ),
   type: text("type").notNull().default("webpage"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
     sql`CURRENT_TIMESTAMP`,
   ),
 });
 
+export const contentItemRelations = relations(
+  contentItems,
+  ({ one, many }) => ({
+    documentFile: one(documentFiles, {
+      fields: [contentItems.documentFileId],
+      references: [documentFiles.id],
+    }),
+    feed: one(feeds, { fields: [contentItems.feedId], references: [feeds.id] }),
+    contentParts: many(contentParts),
+  }),
+);
+
 export const contentParts = sqliteTable("content_parts", {
   id: integer("id").primaryKey(),
   contentItemId: integer("content_item_id").references(() => contentItems.id),
   title: text("title"),
-  text: text("text"),
+  textContent: text("text"),
   order: integer("order"),
+  audioFileId: integer("audio_file_id").references(() => audioFiles.id),
+});
+
+export const contentPartRelations = relations(
+  contentParts,
+  ({ one, many }) => ({
+    contentItem: one(contentItems, {
+      fields: [contentParts.contentItemId],
+      references: [contentItems.id],
+    }),
+  }),
+);
+
+export const documentFiles = sqliteTable("document_files", {
+  id: integer("id").primaryKey(),
+  title: text("title"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+    sql`CURRENT_TIMESTAMP`,
+  ),
+  filePath: text("file_path"),
 });
 
 export const audioItems = sqliteTable("audio_items", {
@@ -107,6 +142,22 @@ export const audioFiles = sqliteTable("audio_files", {
     sql`CURRENT_TIMESTAMP`,
   ),
   filePath: text("file_path"),
+});
+
+// junction table between content items and audio files
+export const contentItemAudioItems = sqliteTable("content_item_audio_items", {
+  id: integer("id").primaryKey(),
+  contentItemId: integer("content_item_id").references(() => contentItems.id),
+  audioItemId: integer("audio_item_id").references(() => audioItems.id),
+  order: integer("order"),
+});
+
+// junction table between content parts and audio items
+export const contentPartAudioItems = sqliteTable("content_part_audio_items", {
+  id: integer("id").primaryKey(),
+  contentPartId: integer("content_part_id").references(() => contentParts.id),
+  audioItemId: integer("audio_item_id").references(() => audioItems.id),
+  order: integer("order"),
 });
 
 export type User = InferSelectModel<typeof users>;

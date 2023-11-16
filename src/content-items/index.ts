@@ -1,6 +1,7 @@
 import { db } from "@src/db";
 import {
   contentItems as contentItemsTable,
+  contentParts as contentPartsTable,
   feeds as feedsTable,
 } from "@src/db/schema";
 
@@ -18,15 +19,16 @@ export async function getContentItemsForFeed(feedId: number) {
 
 export async function getContentItemById(contentItemId: number) {
   const contentItems = await db
-    .select({
-      url: contentItemsTable.url,
-      title: contentItemsTable.title,
-      userId: feedsTable.userId,
-      textContent: contentItemsTable.textContent,
-    })
+    .select()
     .from(contentItemsTable)
+    .rightJoin(
+      contentPartsTable,
+      eq(contentItemsTable.id, contentPartsTable.contentItemId),
+    )
     .innerJoin(feedsTable, eq(contentItemsTable.feedId, feedsTable.id))
     .where(and(eq(contentItemsTable.id, contentItemId)));
+  //
+
   const contentItem = contentItems[0];
   return contentItem;
 }
@@ -51,4 +53,49 @@ export async function updateContentItem(
     .where(and(eq(contentItemsTable.id, contentItemId)));
   const updatedContentItem = updatedContentItems[0];
   return updatedContentItem;
+}
+
+type ContentPartInsert = {
+  contentItemId: number;
+  title: string;
+  textContent: string;
+  order: number;
+};
+
+export async function createContentParts(
+  contentPartValues: ContentPartInsert[],
+) {
+  const contentParts = await db
+    .insert(contentPartsTable)
+    .values(contentPartValues)
+    .returning();
+  return contentParts;
+}
+
+export async function createContentPart({
+  contentItemId,
+  title,
+  textContent,
+  order,
+}: ContentPartInsert) {
+  const contentParts = await db
+    .insert(contentPartsTable)
+    .values({
+      contentItemId,
+      title,
+      textContent,
+      order,
+    })
+    .returning();
+  const contentPart = contentParts[0];
+  return contentPart;
+}
+
+export async function getContentPartsForContentItem(contentItemId) {
+  const contentParts = await db
+    .select()
+    .from(contentPartsTable)
+    .where(eq(contentPartsTable.contentItemId, contentItemId));
+
+  return contentParts;
 }

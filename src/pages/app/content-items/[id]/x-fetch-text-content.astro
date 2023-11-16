@@ -1,6 +1,6 @@
 ---
-import { getContentItemById, updateContentItem } from "@src/content-items";
-import { getTextFromUrl } from "@src/text-extraction";
+import { getContentItemById, createContentParts } from "@src/content-items";
+import { getTextPartsFromUrl } from "@src/text-extraction";
 import { Debug } from "astro:components";
 
 const contentItemIdStr = Astro.params.id;
@@ -15,10 +15,24 @@ if (contentItem.userId !== userId) {
 }
 
 const url = contentItem.url;
-const textContent = await getTextFromUrl(url);
+const textParts = await getTextPartsFromUrl(url);
+
+// TODO: if content item already has parts, delete them?
+const textPartValues = textParts.map((textPart, index) => {
+  return {
+    contentItemId: contentItemId,
+    title: textPart.title,
+    textContent: textPart.textContent,
+    order: index,
+  };
+});
+
+const contentParts = await createContentParts(textPartValues);
+
+// create content parts for each text part
 
 // add text to content item
-await updateContentItem(contentItemId, { textContent });
+// await updateContentItem(contentItemId, { textContent });
 ---
 
-<div>{textContent}</div>
+<Debug {contentParts} />

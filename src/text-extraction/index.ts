@@ -53,14 +53,22 @@ export async function getTextPartsFromUrl(url) {
     $(divTag).replaceWith($(divTag).contents());
   });
 
+  console.log($.html());
+
   const selectorsToRemove = "img, figure";
 
   $(selectorsToRemove).remove();
 
-  const numberOfH1s = $("h1").length;
+  function getTopHeadingLevel($) {
+    const headingLevels = ["h1", "h2", "h3", "h4", "h5", "h6"];
+    for (const headingLevel of headingLevels) {
+      if ($(headingLevel).length > 0) {
+        return headingLevel;
+      }
+    }
+  }
 
-  const chapterHeadingSelector = numberOfH1s > 1 ? "h1" : "h2";
-  console.log({ chapterHeadingSelector });
+  const chapterHeadingSelector = getTopHeadingLevel($);
 
   const firstTagIsHeading = $("body")
     .children()
@@ -85,7 +93,7 @@ export async function getTextPartsFromUrl(url) {
 
       return {
         title: chapterTitle,
-        text: chapterText,
+        textContent: chapterText,
       };
     })
     .get();

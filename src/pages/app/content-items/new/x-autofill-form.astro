@@ -2,8 +2,6 @@
 export const partial = true;
 import { getArticleTitleFromUrl } from "@src/text-extraction";
 
-await new Promise((resolve) => setTimeout(resolve, 1000));
-
 const formData = await Astro.request.formData();
 const url = formData.get("url");
 const articleTitle = await getArticleTitleFromUrl(url);
