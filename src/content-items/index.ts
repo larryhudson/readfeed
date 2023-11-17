@@ -18,19 +18,9 @@ export async function getContentItemsForFeed(feedId: number) {
 }
 
 export async function getContentItemById(contentItemId: number) {
-  // const contentItems = await db
-  //   .select()
-  //   .from(contentItemsTable)
-  //   .rightJoin(
-  //     contentPartsTable,
-  //     eq(contentItemsTable.id, contentPartsTable.contentItemId),
-  //   )
-  //   .innerJoin(feedsTable, eq(contentItemsTable.feedId, feedsTable.id))
-  //   .where(and(eq(contentItemsTable.id, contentItemId)));
-  //
-  // const contentItem = contentItems;
   const contentItem = await db.query.contentItems.findFirst({
-    where: (contentItemsTable, { eq }) => eq(contentItemsTable.id, 1),
+    where: (contentItemsTable, { eq }) =>
+      eq(contentItemsTable.id, contentItemId),
     with: {
       contentParts: true,
       feed: true,
