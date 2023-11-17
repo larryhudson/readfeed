@@ -14,7 +14,7 @@ if (!feed) {
   return new Response("Not found", { status: 404 });
 }
 
-const episodes = await getContentItemsForFeed(feed.id);
+const { contentItems, audioItems } = feed;
 ---
 
 <Layout>
@@ -35,23 +35,35 @@ const episodes = await getContentItemsForFeed(feed.id);
       </p>
     </div>
   </details>
-  <h2>Episodes</h2>
+  <h2>Content items</h2>
   <p>
     <a href={`/app/content-items/new?feed-id=${feedId}`}
-      >Add a new content item</a
+      >Add a new content item to this feed</a
     >
   </p>
   <ul>
     {
-      episodes.map((episode) => (
+      contentItems.map((contentItem) => (
         <li>
-          <a href={`/app/content-items/${episode.id}/`}>{episode.title}</a>
+          <a href={`/app/content-items/${contentItem.id}/`}>
+            {contentItem.title}
+          </a>
         </li>
       ))
     }
   </ul>
 
-  <Debug {episodes} />
+  <h2>Audio items</h2>
+  <ul>
+    {
+      audioItems.map((audioItem) => (
+        <li>
+          <a href={`/app/audio-items/${audioItem.id}/`}>{audioItem.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+  <Debug {contentItems} />
   <Debug {feed} />
 </Layout>
 

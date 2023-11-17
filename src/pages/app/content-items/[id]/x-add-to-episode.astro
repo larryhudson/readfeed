@@ -1,0 +1,64 @@
+---
+import { getContentItemById, updateContentItem } from "@src/content-items";
+import { createEpisode, addContentPartsToEpisode } from "@src/audio-items";
+import { Debug } from "astro:components";
+
+function strToInt(str) {
+  return parseInt(str, 10);
+}
+
+const contentItemIdStr = Astro.params.id;
+const contentItemId = parseInt(contentItemIdStr, 10);
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+if (Astro.request.method !== "POST") {
+  return new Response(null, {
+    status: 405,
+    headers: {
+      Allow: "POST",
+    },
+  });
+}
+
+const contentItem = await getContentItemById(contentItemId);
+if (contentItem.feed.userId !== userId) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const formData = await Astro.request.formData();
+
+const feedId = strToInt(formData.get("feed"));
+const suppliedEpisodeId =
+  formData.get("episode") === "" ? null : strToInt(formData.get("episode"));
+const episodeTitle = formData.get("episode-title");
+const partIds = formData.getAll("parts[]").map(strToInt);
+
+const formDataObj = {
+  contentItemId,
+  feedId,
+  suppliedEpisodeId,
+  episodeTitle,
+  partIds,
+};
+
+async function createOrGetEpisode(feedId, episodeId, episodeTitle) {
+  if (episodeId === null) {
+    const newEpisode = await createEpisode({ feedId, title: episodeTitle });
+    return newEpisode.id;
+  } else {
+    return episodeId;
+  }
+}
+
+const episodeId = await createOrGetEpisode(
+  feedId,
+  suppliedEpisodeId,
+  episodeTitle,
+);
+
+await addContentPartsToEpisode(episodeId, partIds);
+---
+
+<Debug {episodeId} />

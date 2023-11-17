@@ -68,6 +68,15 @@ export const feeds = sqliteTable("feeds", {
   userId: text("user_id").references(() => users.id),
 });
 
+export const feedsRelations = relations(feeds, ({ one, many }) => ({
+  user: one(users, {
+    fields: [feeds.userId],
+    references: [users.id],
+  }),
+  contentItems: many(contentItems),
+  audioItems: many(audioItems),
+}));
+
 export const contentItems = sqliteTable("content_items", {
   id: integer("id").primaryKey(),
   feedId: integer("feed_id").references(() => feeds.id),
@@ -111,6 +120,11 @@ export const contentPartRelations = relations(
       fields: [contentParts.contentItemId],
       references: [contentItems.id],
     }),
+    contentPartAudioItems: many(contentPartAudioItems),
+    audioFile: one(audioFiles, {
+      fields: [contentParts.audioFileId],
+      references: [audioFiles.id],
+    }),
   }),
 );
 
@@ -125,12 +139,18 @@ export const documentFiles = sqliteTable("document_files", {
 
 export const audioItems = sqliteTable("audio_items", {
   id: integer("id").primaryKey(),
+  feedId: integer("feed_id").references(() => feeds.id),
   audioFileId: integer("audio_file_id").references(() => audioFiles.id),
   title: text("title"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
     sql`CURRENT_TIMESTAMP`,
   ),
 });
+
+export const audioItemRelations = relations(audioItems, ({ one, many }) => ({
+  feed: one(feeds, { fields: [audioItems.feedId], references: [feeds.id] }),
+  contentPartAudioItems: many(contentPartAudioItems),
+}));
 
 export const audioFiles = sqliteTable("audio_files", {
   id: integer("id").primaryKey(),
@@ -159,6 +179,20 @@ export const contentPartAudioItems = sqliteTable("content_part_audio_items", {
   audioItemId: integer("audio_item_id").references(() => audioItems.id),
   order: integer("order"),
 });
+
+export const contentPartAudioItemsRelations = relations(
+  contentPartAudioItems,
+  ({ one }) => ({
+    contentPart: one(contentParts, {
+      fields: [contentPartAudioItems.contentPartId],
+      references: [contentParts.id],
+    }),
+    audioItem: one(audioItems, {
+      fields: [contentPartAudioItems.audioItemId],
+      references: [audioItems.id],
+    }),
+  }),
+);
 
 export type User = InferSelectModel<typeof users>;
 export type WaitlistUser = InferSelectModel<typeof waitlistUsers>;

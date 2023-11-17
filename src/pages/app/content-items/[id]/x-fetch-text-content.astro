@@ -10,7 +10,7 @@ const session = await Astro.locals.auth.validate();
 const userId = session.user.userId;
 
 const contentItem = await getContentItemById(contentItemId);
-if (contentItem.userId !== userId) {
+if (contentItem.feed.userId !== userId) {
   return new Response("Unauthorized", { status: 401 });
 }
 

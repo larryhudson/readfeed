@@ -12,12 +12,14 @@ export async function getFeedsForUser(userId: string) {
 }
 
 export async function getFeedByIdForUser(userId, feedId) {
-  const feeds = await db
-    .select()
-    .from(feedsTable)
-    .where(and(eq(feedsTable.userId, userId), eq(feedsTable.id, feedId)));
-
-  const feed = feeds[0];
+  const feed = await db.query.feeds.findFirst({
+    where: (feedsTable, { eq, and }) =>
+      and(eq(feedsTable.id, feedId), eq(feedsTable.userId, userId)),
+    with: {
+      contentItems: true,
+      audioItems: true,
+    },
+  });
 
   return feed;
 }

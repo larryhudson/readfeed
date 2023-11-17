@@ -1,0 +1,91 @@
+---
+import { Debug } from "astro:components";
+import Layout from "@src/components/Layout.astro";
+
+import { getContentItemById } from "@src/content-items";
+import { getEpisodesForFeed } from "@src/audio-items";
+import { getFeedsForUser } from "@src/feeds";
+
+const contentItemIdStr = Astro.params.id;
+const contentItemId = parseInt(contentItemIdStr, 10);
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+const feeds = await getFeedsForUser(userId);
+const chosenFeedId = feeds[0].id;
+
+const feedEpisodes = await getEpisodesForFeed(chosenFeedId);
+
+const contentItem = await getContentItemById(contentItemId);
+const newEpisodeTitle = contentItem.title;
+if (contentItem.feed.userId !== userId) {
+  return new Response("Unauthorized", { status: 401 });
+}
+---
+
+<Layout>
+  <h1>Add content item to episode</h1>
+
+  <p>Content item: {contentItem.title}</p>
+
+  <p>
+    <a href="..">&larr; Back to content item</a>
+  </p>
+
+  <form action="../x-add-to-episode" method="POST">
+    <h2>Choose feed</h2>
+    <Debug {feeds} />
+    {
+      feeds.map((feed, feedIndex) => (
+        <p>
+          <label>
+            <input
+              checked={feedIndex === 0 ? "true" : undefined}
+              type="radio"
+              name="feed"
+              value={feed.id}
+            />{" "}
+            {feed.name}
+          </label>
+        </p>
+      ))
+    }
+
+    <h2>Create an episode or add to existing</h2>
+    <Debug {feedEpisodes} />
+
+    <label>
+      <select name="episode">
+        <option value="">Create new</option>
+      </select>
+    </label>
+
+    <label>
+      New episode title
+      <input type="text" name="episode-title" value={newEpisodeTitle} />
+    </label>
+
+    <h2>Include parts</h2>
+    {
+      contentItem.contentParts.map((part) => (
+        <p>
+          <label>
+            <input type="checkbox" checked="" name="parts[]" value={part.id} />{" "}
+            {part.title} (chars: {part.textContent.length})
+          </label>
+        </p>
+      ))
+    }
+
+    <button>Add to episode</button>
+  </form>
+
+  <Debug {contentItem} />
+</Layout>
+
+<style>
+  #text-content {
+    white-space: pre-wrap;
+  }
+</style>

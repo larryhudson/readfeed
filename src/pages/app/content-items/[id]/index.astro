@@ -14,17 +14,19 @@ const session = await Astro.locals.auth.validate();
 const userId = session.user.userId;
 
 const contentItem = await getContentItemById(contentItemId);
-console.log(contentItem);
-if (contentItem.feeds.userId !== userId) {
+if (contentItem.feed.userId !== userId) {
   return new Response("Unauthorized", { status: 401 });
 }
-
-const contentParts = await getContentPartsForContentItem(contentItemId);
 ---
 
 <Layout>
   <h1>Content item: {contentItem.title}</h1>
   <p>URL: <a href={contentItem.url}>{contentItem.url}</a></p>
+
+  <p>
+    <a href="./add-to-episode/">Create podcast episode with this content item</a
+    >
+  </p>
 
   <h2>Text content</h2>
 
@@ -39,9 +41,6 @@ const contentParts = await getContentPartsForContentItem(contentItemId);
     {contentItem.textContent && contentItem.textContent}
   </div>
   <Debug {contentItem} />
-
-  <h2>Looking up content parts separately</h2>
-  <Debug {contentParts} />
 </Layout>
 
 <style>
