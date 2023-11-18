@@ -51,9 +51,14 @@ export async function getAudioItemById(audioItemId: number) {
   const audioItem = await db.query.audioItems.findFirst({
     where: (audioItemsTable, { eq }) => eq(audioItemsTable.id, audioItemId),
     with: {
+      audioFile: true,
       contentPartAudioItems: {
         with: {
-          contentPart: true,
+          contentPart: {
+            with: {
+              audioFile: true,
+            },
+          },
         },
         columns: {},
       },

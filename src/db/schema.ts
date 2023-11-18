@@ -150,12 +150,14 @@ export const audioItems = sqliteTable("audio_items", {
 export const audioItemRelations = relations(audioItems, ({ one, many }) => ({
   feed: one(feeds, { fields: [audioItems.feedId], references: [feeds.id] }),
   contentPartAudioItems: many(contentPartAudioItems),
+  audioFile: one(audioFiles, {
+    fields: [audioItems.audioFileId],
+    references: [audioFiles.id],
+  }),
 }));
 
 export const audioFiles = sqliteTable("audio_files", {
   id: integer("id").primaryKey(),
-  url: text("url").notNull(),
-  title: text("title"),
   durationMs: integer("duration_ms"),
   duration: text("duration"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(

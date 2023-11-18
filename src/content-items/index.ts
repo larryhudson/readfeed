@@ -22,7 +22,11 @@ export async function getContentItemById(contentItemId: number) {
     where: (contentItemsTable, { eq }) =>
       eq(contentItemsTable.id, contentItemId),
     with: {
-      contentParts: true,
+      contentParts: {
+        with: {
+          audioFile: true,
+        },
+      },
       feed: true,
     },
   });

@@ -4,9 +4,17 @@ import { Buffer } from "buffer";
 import fs from "fs";
 import fsPromises from "fs/promises";
 import path from "path";
-import { secsToMs } from "../utils/time.js";
+import { secsToMs, msToHHMMSS } from "../utils/time.js";
 import { getAudioDurationInSeconds } from "get-audio-duration";
 import md5 from "js-md5";
+import { db } from "@src/db";
+import {
+  audioFiles as audioFilesTable,
+  audioItems as audioItemsTable,
+  contentParts as contentPartsTable,
+} from "@src/db/schema";
+import { eq } from "drizzle-orm";
+import { getEnv } from "@src/env";
 
 export function getCostEstimate(numChars) {
   const AUD_PER_CHARACTER = 0.000024241;
@@ -43,8 +51,8 @@ async function getAudioBufferForChunk(text) {
   console.log("getting audio for text");
   console.log(text);
 
-  const AZURE_API_KEY = process.env.AZURE_API_KEY;
-  const AZURE_API_REGION = process.env.AZURE_API_REGION;
+  const AZURE_API_KEY = import.meta.env.AZURE_API_KEY;
+  const AZURE_API_REGION = import.meta.env.AZURE_API_REGION;
 
   const voiceName = "en-AU-WilliamNeural";
   const ttsLang = "en-AU";
@@ -90,25 +98,24 @@ export async function getAudioBufferForText(text) {
 
   // write the joined buffer to a temporary audio file
 
-  const tmpFolderPath = "./tmp-audio";
+  const audioFolderPath = "./media/audio";
 
-  const tmpFolderExists = await fs.existsSync(tmpFolderPath);
-  if (!tmpFolderExists) {
-    await fsPromises.mkdir(tmpFolderPath, { recursive: true });
+  const audioFolderExists = fs.existsSync(audioFolderPath);
+  if (!audioFolderExists) {
+    await fsPromises.mkdir(audioFolderPath, { recursive: true });
   }
 
-  const tmpAudioPath = path.join(tmpFolderPath, `${textHash}.mp3`);
+  const audioPath = path.join(audioFolderPath, `${textHash}.mp3`);
 
-  await fsPromises.writeFile(tmpAudioPath, joinedBuffer);
+  await fsPromises.writeFile(audioPath, joinedBuffer);
 
-  const durationSecs = await getAudioDurationInSeconds(tmpAudioPath);
+  const durationSecs = await getAudioDurationInSeconds(audioPath);
   const durationMs = secsToMs(durationSecs);
-
-  await fsPromises.rm(tmpAudioPath);
 
   return {
     audioBuffer: joinedBuffer,
     durationMs,
+    filePath: audioPath,
   };
 }
 
@@ -132,4 +139,101 @@ export async function getAudioForChapters(chapters) {
   );
 
   return chaptersWithAudio;
+}
+
+async function createAudioFileInDb({ filePath, durationMs, durationStr }) {
+  const createdAudioFiles = await db
+    .insert(audioFilesTable)
+    .values({
+      filePath,
+      durationMs,
+      duration: durationStr,
+    })
+    .returning();
+
+  return createdAudioFiles[0];
+}
+
+async function addAudioFileToContentPart(contentPartId, audioFileId) {
+  const updatedContentParts = await db
+    .update(contentPartsTable)
+    .set({ audioFileId })
+    .where(eq(contentPartsTable.id, contentPartId))
+    .returning();
+
+  return updatedContentParts[0];
+}
+
+async function addAudioFileToAudioItem(audioItemId, audioFileId) {
+  const updatedAudioItems = await db
+    .update(audioItemsTable)
+    .set({ audioFileId })
+    .where(eq(audioItemsTable.id, audioItemId))
+    .returning();
+
+  return updatedAudioItems[0];
+}
+
+export async function combineContentPartAudioFilesInAudioItem(audioItem) {
+  const { contentParts } = audioItem;
+  const audioPaths = contentParts.map((contentPart) => {
+    return contentPart.audioFile.filePath;
+  });
+
+  const audioBuffers = audioPaths.map((audioPath) => {
+    return fs.readFileSync(audioPath);
+  });
+
+  const joinedBuffer = Buffer.concat(audioBuffers);
+  const textHash = md5(contentParts.map((cp) => cp.textContent).join("\n"));
+  // write the joined buffer to a temporary audio file
+  const audioFolderPath = "./media/audio";
+  const audioFolderExists = fs.existsSync(audioFolderPath);
+  if (!audioFolderExists) {
+    await fsPromises.mkdir(audioFolderPath, { recursive: true });
+  }
+  const audioPath = path.join(audioFolderPath, `${textHash}.mp3`);
+  await fsPromises.writeFile(audioPath, joinedBuffer);
+  const durationSecs = await getAudioDurationInSeconds(audioPath);
+  const durationMs = secsToMs(durationSecs);
+  const durationStr = msToHHMMSS(durationMs);
+
+  // create a new audio file in the database
+  const createdAudioFile = await createAudioFileInDb({
+    filePath: audioPath,
+    durationMs,
+    durationStr,
+  });
+
+  // link the audio item to the audio file
+  const updatedAudioItem = await addAudioFileToAudioItem(
+    audioItem.id,
+    createdAudioFile.id,
+  );
+
+  return updatedAudioItem;
+}
+
+export async function fetchAudioForContentPart(contentPart: ContentPart) {
+  // get the audio buffer for the content part
+  const { durationMs, filePath } = await getAudioBufferForText(
+    contentPart.textContent,
+  );
+
+  const durationStr = msToHHMMSS(durationMs);
+
+  //  and create a new audio file in the database
+  const createdAudioFile = await createAudioFileInDb({
+    filePath,
+    durationMs,
+    durationStr,
+  });
+
+  // link the content part to the audio file
+  const updatedContentPart = await addAudioFileToContentPart(
+    contentPart.id,
+    createdAudioFile.id,
+  );
+
+  return updatedContentPart;
 }

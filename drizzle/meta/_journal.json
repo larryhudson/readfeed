@@ -15,6 +15,13 @@
       "when": 1700257919479,
       "tag": "0001_glossy_dakota_north",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1700345702329,
+      "tag": "0002_rich_nick_fury",
+      "breakpoints": true
     }
   ]
 }
