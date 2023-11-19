@@ -1,8 +1,7 @@
 ---
 import { Debug } from "astro:components";
 import { getAudioItemById } from "@src/audio-items";
-import { fetchAudioForContentPart } from "@src/text-to-speech";
-import pMap from "p-map";
+import { addTaskToQueue } from "@src/background-queue";
 
 const audioItemIdStr = Astro.params.id;
 const audioItemId = parseInt(audioItemIdStr, 10);
@@ -15,13 +14,11 @@ if (audioItem.feed.userId !== userId) {
   return new Response("Unauthorized", { status: 401 });
 }
 
-const contentPartsWithoutAudio = audioItem.contentParts.filter(
-  (contentPart) => contentPart.audioFileId === null,
-);
-
-await pMap(contentPartsWithoutAudio, fetchAudioForContentPart, {
-  concurrency: 1,
+// add task to background queue - fetch audio for audio item
+const job = await addTaskToQueue({
+  taskName: "fetchAudioForAudioItem",
+  taskData: { audioItemId },
 });
 ---
 
-<Debug {contentPartsWithoutAudio} />
+<div hx-get={`/app/job-progress/${job.id}/`} hx-trigger="load"></div>

@@ -49,10 +49,11 @@ function splitTextIntoChunksByLines(text, chunkLength) {
 
 async function getAudioBufferForChunk(text) {
   console.log("getting audio for text");
-  console.log(text);
 
-  const AZURE_API_KEY = import.meta.env.AZURE_API_KEY;
-  const AZURE_API_REGION = import.meta.env.AZURE_API_REGION;
+  const AZURE_API_KEY =
+    import.meta?.env?.AZURE_API_KEY || process.env.AZURE_API_KEY;
+  const AZURE_API_REGION =
+    import.meta?.env?.AZURE_API_REGION || process.env.AZURE_API_REGION;
 
   const voiceName = "en-AU-WilliamNeural";
   const ttsLang = "en-AU";

@@ -145,6 +145,7 @@ export const audioItems = sqliteTable("audio_items", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
     sql`CURRENT_TIMESTAMP`,
   ),
+  jobId: integer("job_id"),
 });
 
 export const audioItemRelations = relations(audioItems, ({ one, many }) => ({
@@ -201,3 +202,4 @@ export type WaitlistUser = InferSelectModel<typeof waitlistUsers>;
 export type WaitlistInvitation = InferSelectModel<typeof waitlistInvitations>;
 export type Feed = InferSelectModel<typeof feeds>;
 export type ContentItem = InferSelectModel<typeof contentItems>;
+export type AudioItem = InferSelectModel<typeof audioItems>;

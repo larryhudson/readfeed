@@ -1,0 +1,24 @@
+---
+export const partial = true;
+import { Debug } from "astro:components";
+import { getJob } from "@src/background-queue";
+
+const jobId = Astro.params.id;
+
+const job = await getJob(jobId);
+const jobIsDone = job.progress === 1;
+---
+
+<div>
+  {
+    jobIsDone ? (
+      <div>
+        <Debug {job} />
+      </div>
+    ) : (
+      <div hx-get={`/app/job-progress/${job.id}/`} hx-trigger="every 500ms">
+        <Debug {job} />
+      </div>
+    )
+  }
+</div>

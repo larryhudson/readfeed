@@ -1,11 +1,14 @@
 import { Worker } from "bullmq";
 import type { Job } from "bullmq";
-import { notifyAdminNewWaitlistUser } from "./background-tasks/notify-admin-new-waitlist-user.js";
+import { notifyAdminAboutNewWaitlistUser } from "./background-tasks/notify-admin-new-waitlist-user.js";
 import { sendInvitationEmail } from "./background-tasks/send-invitation.js";
+import { fetchAudioForAudioItem } from "./background-tasks/fetch-audio-for-audio-item.js";
+import "dotenv/config";
 
 const handlers = {
-  notifyAdminNewWaitlistUser,
+  notifyAdminAboutNewWaitlistUser,
   sendInvitationEmail,
+  fetchAudioForAudioItem,
 };
 
 function handleJob(job: Job) {
@@ -17,7 +20,7 @@ function handleJob(job: Job) {
 
   console.log({ jobData: job.data });
 
-  return handler(job.data);
+  return handler(job);
 }
 
 const redisOptions = {

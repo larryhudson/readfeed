@@ -1,0 +1,1 @@
+ALTER TABLE audio_items ADD `job_id` integer;

@@ -7,7 +7,7 @@ import {
   feeds as feedsTable,
 } from "@src/db/schema";
 
-import type { ContentItem } from "@src/db/schema";
+import type { AudioItem } from "@src/db/schema";
 import { eq, and } from "drizzle-orm";
 
 export async function getEpisodesForFeed(feedId) {
@@ -84,4 +84,17 @@ export async function getAudioItemsForFeed(feedId: number) {
     .where(eq(audioItemsTable.feedId, feedId));
 
   return audioItems;
+}
+
+export async function updateAudioItem(
+  audioItemId: number,
+  data: Partial<AudioItem>,
+) {
+  console.log({ audioItemId, data });
+  const updatedAudioItems = await db
+    .update(audioItemsTable)
+    .set(data)
+    .where(and(eq(audioItemsTable.id, audioItemId)));
+  const updatedAudioItem = updatedAudioItems[0];
+  return updatedAudioItem;
 }

@@ -1,9 +1,10 @@
 import { db } from "@src/db";
 import { waitlistUsers } from "@src/db/schema";
 import { eq } from "drizzle-orm";
-import { notifyAdminAboutNewWaitlistUser } from "@src/waitlist";
+import { notifyAdminAboutNewWaitlistUser as notifyAdmin } from "@src/waitlist";
 
-export default async function notifyAdminNewWaitlistUser({ waitlistUserId }) {
+export async function notifyAdminAboutNewWaitlistUser(job) {
+  const { waitlistUserId } = job.data;
   const waitlistUserResults = await db
     .select()
     .from(waitlistUsers)
@@ -11,7 +12,7 @@ export default async function notifyAdminNewWaitlistUser({ waitlistUserId }) {
 
   const waitlistUser = waitlistUserResults[0];
 
-  const result = await notifyAdminAboutNewWaitlistUser(waitlistUser);
+  const result = await notifyAdmin(waitlistUser);
 
   return result;
 }

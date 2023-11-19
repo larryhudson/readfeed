@@ -18,3 +18,9 @@ export async function addTaskToQueue({
   const job = await taskQueue.add(taskName, taskData);
   return job;
 }
+
+export async function getJob(jobId: string) {
+  const job = await taskQueue.getJob(jobId);
+
+  return job;
+}

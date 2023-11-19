@@ -3,7 +3,9 @@ import { waitlistInvitations } from "@src/db/schema";
 import { eq } from "drizzle-orm";
 import { sendInviteEmail } from "@src/waitlist";
 
-export async function sendInvitationEmail({ invitationId }) {
+export async function sendInvitationEmail(job) {
+  const { invitationId } = job.data;
+
   const invitations = await db
     .select()
     .from(waitlistInvitations)
