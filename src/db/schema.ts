@@ -90,6 +90,7 @@ export const contentItems = sqliteTable("content_items", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
     sql`CURRENT_TIMESTAMP`,
   ),
+  jobId: integer("job_id"),
 });
 
 export const contentItemRelations = relations(

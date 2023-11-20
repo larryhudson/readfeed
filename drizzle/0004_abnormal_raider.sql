@@ -25,3 +25,4 @@ ALTER TABLE new_content_items RENAME TO content_items;
 COMMIT;
 PRAGMA foreign_keys=on;
 */
+SELECT * from content_items;

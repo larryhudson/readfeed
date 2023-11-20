@@ -3,12 +3,15 @@ import type { Job } from "bullmq";
 import { notifyAdminAboutNewWaitlistUser } from "./background-tasks/notify-admin-new-waitlist-user.js";
 import { sendInvitationEmail } from "./background-tasks/send-invitation.js";
 import { fetchAudioForAudioItem } from "./background-tasks/fetch-audio-for-audio-item.js";
+import { extractChaptersFromDocument } from "./background-tasks/extract-from-document.js";
+
 import "dotenv/config";
 
 const handlers = {
   notifyAdminAboutNewWaitlistUser,
   sendInvitationEmail,
   fetchAudioForAudioItem,
+  extractChaptersFromDocument,
 };
 
 function handleJob(job: Job) {

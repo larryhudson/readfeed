@@ -16,6 +16,7 @@
     "@astrojs/node": "^6.0.3",
     "@extractus/article-extractor": "^8.0.3",
     "@lucia-auth/adapter-sqlite": "^2.0.1",
+    "adm-zip": "^0.5.10",
     "article-title": "^4.1.0",
     "astro": "^3.4.0",
     "better-sqlite3": "^9.0.0",

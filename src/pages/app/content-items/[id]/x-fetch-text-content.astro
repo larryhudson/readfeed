@@ -1,4 +1,5 @@
 ---
+import { addTaskToQueue } from "@src/background-queue";
 import { getContentItemById, createContentParts } from "@src/content-items";
 import { getTextPartsFromUrl } from "@src/text-extraction/webpage";
 import { Debug } from "astro:components";
@@ -12,6 +13,14 @@ const userId = session.user.userId;
 const contentItem = await getContentItemById(contentItemId);
 if (contentItem.feed.userId !== userId) {
   return new Response("Unauthorized", { status: 401 });
+}
+
+if (contentItem.documentFile) {
+  const job = await addTaskToQueue({
+    taskName: "extractChaptersFromDocument",
+    taskData: { contentItemId },
+  });
+  return;
 }
 
 const url = contentItem.url;

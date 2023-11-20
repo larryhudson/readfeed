@@ -17,11 +17,16 @@ async function findFileInDirectory(directory, filename) {
   return files[0];
 }
 
-async function extractChaptersFromEpub(epubFilePath) {
+export async function extractChaptersFromEpub(epubFilePath) {
   try {
-    const epubFilename = path.basename(epubFilePath);
+    const epubFilename = path.basename(
+      epubFilePath,
+      path.extname(epubFilePath),
+    );
     const baseTmpFolder = "./tmp/epub";
     const tmpFolderPath = path.join(baseTmpFolder, epubFilename);
+
+    console.log({ tmpFolderPath });
 
     if (!fs.existsSync(tmpFolderPath)) {
       fs.mkdirSync(tmpFolderPath, { recursive: true });
@@ -29,16 +34,16 @@ async function extractChaptersFromEpub(epubFilePath) {
 
     const tmpFolderExists = fs.existsSync(tmpFolderPath);
     if (tmpFolderExists) {
-      fs.rmdirSync(epubTxtDirectory, { recursive: true });
+      fs.rmdirSync(tmpFolderPath, { recursive: true });
     }
 
     await fs.promises.mkdir(tmpFolderPath);
 
     await unzipFileToDirectory(epubFilePath, tmpFolderPath);
 
-    async function getEpubChapters(tempDirectory) {
+    async function getEpubChapters(tmpFolderPath) {
       const contentsFilePath = await findFileInDirectory(
-        tempDirectory,
+        tmpFolderPath,
         "toc.ncx",
       );
 
@@ -67,7 +72,7 @@ async function extractChaptersFromEpub(epubFilePath) {
         .get();
     }
 
-    const chapters = await getEpubChapters(tempDirectory);
+    const chapters = await getEpubChapters(tmpFolderPath);
 
     async function getTextForChapter(chapter) {
       const { title, htmlPath } = chapter;
@@ -119,7 +124,7 @@ async function extractChaptersFromEpub(epubFilePath) {
     console.log("chapters inside epub function");
     console.log(chaptersWithText);
 
-    fs.rmdirSync(tempDirectory, { recursive: true });
+    fs.rmdirSync(tmpFolderPath, { recursive: true });
 
     return chaptersWithText;
   } catch (error) {
