@@ -29,6 +29,13 @@
       "when": 1700427534161,
       "tag": "0003_abandoned_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1700512761517,
+      "tag": "0004_abnormal_raider",
+      "breakpoints": true
     }
   ]
 }

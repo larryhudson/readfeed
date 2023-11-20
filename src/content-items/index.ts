@@ -28,6 +28,7 @@ export async function getContentItemById(contentItemId: number) {
         },
       },
       feed: true,
+      documentFile: true,
     },
   });
   return contentItem;

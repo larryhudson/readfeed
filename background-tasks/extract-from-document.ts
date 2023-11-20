@@ -1,27 +1,23 @@
-import { getRecordById, db } from "../src/utils/db.js";
-import { extractChaptersFromDoc } from "../src/utils/extract-from-document.js";
-import "dotenv/config";
+import { getContentItemById, createContentParts } from "@src/content-items";
+import { extractChaptersFromDoc } from "@src/text-extraction";
 
-export async function extractChaptersFromDocument({ documentId }) {
-  const document = getRecordById("documents", documentId);
-  const documentPath = document.filepath;
+export async function extractChaptersFromDocument(job) {
+  const { contentItemId } = job.data;
+  const contentItem = await getContentItemById(contentItemId);
+  const documentFilePath = contentItem.documentFile.filePath;
 
-  const chapters = await extractChaptersFromDoc(documentPath);
+  const textParts = await extractChaptersFromDoc(documentFilePath);
 
-  console.log("chapters");
-  console.log(chapters);
+  const textPartValues = textParts.map((textPart, index) => {
+    return {
+      contentItemId: contentItemId,
+      title: textPart.title,
+      textContent: textPart.textContent,
+      order: index,
+    };
+  });
 
-  const createChapterStatement = db.prepare(`INSERT INTO document_chapters (
-    document_id,
-    title,
-    text_content
-  )
-  VALUES (?, ?, ?)`);
+  const createdContentParts = await createContentParts(textPartValues);
 
-  // TODO: probably not the best way to do this
-  for (const chapter of chapters) {
-    createChapterStatement.run(documentId, chapter.title, chapter.text_content);
-  }
-
-  return document;
+  return createdContentParts;
 }

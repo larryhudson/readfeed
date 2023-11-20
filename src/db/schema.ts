@@ -80,7 +80,7 @@ export const feedsRelations = relations(feeds, ({ one, many }) => ({
 export const contentItems = sqliteTable("content_items", {
   id: integer("id").primaryKey(),
   feedId: integer("feed_id").references(() => feeds.id),
-  url: text("url").notNull(),
+  url: text("url"),
   title: text("title"),
   textContent: text("text_content"),
   documentFileId: integer("document_file_id").references(

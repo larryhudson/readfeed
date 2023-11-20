@@ -1,6 +1,6 @@
 ---
 export const partial = true;
-import { getArticleTitleFromUrl } from "@src/text-extraction";
+import { getArticleTitleFromUrl } from "@src/text-extraction/webpage";
 
 const formData = await Astro.request.formData();
 const url = formData.get("url");

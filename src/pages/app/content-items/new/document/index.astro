@@ -1,0 +1,62 @@
+---
+import Layout from "@src/components/Layout.astro";
+import { Debug } from "astro:components";
+import { getFeedsForUser } from "@src/feeds";
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+const feedIdStr = Astro.url.searchParams.get("feed-id");
+const feedId = feedIdStr ? parseInt(feedIdStr) : null;
+
+const feeds = await getFeedsForUser(userId);
+---
+
+<Layout>
+  <h1>Add a new document</h1>
+
+  <form action="x-create" method="POST" enctype="multipart/form-data">
+    <label for="feed">Feed</label>
+    <select id="feed" name="feed-id">
+      {
+        feeds.map((feed) => (
+          <option
+            value={feed.id}
+            selected={feed.id === feedId ? "" : undefined}
+          >
+            {feed.name}
+          </option>
+        ))
+      }
+    </select>
+
+    <label for="file">File</label>
+    <input type="file" name="file" id="file" />
+
+    <script>
+      const fileInput = document.querySelector("#file");
+      const titleInput = document.querySelector("#title");
+
+      // when the file input changes, update the title input
+      fileInput.addEventListener("input", () => {
+        const file = fileInput.files[0];
+        if (!file) {
+          return;
+        }
+        const title = file.name.replace(/\.[^/.]+$/, "");
+        titleInput.value = title;
+      });
+    </script>
+
+    <label for="title">Title</label>
+    <input type="text" name="title" id="title" />
+
+    <button>Add</button>
+  </form>
+
+  <style is:global>
+    input[type="text"] {
+      width: 100%;
+    }
+  </style>
+</Layout>

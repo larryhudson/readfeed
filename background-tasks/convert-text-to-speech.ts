@@ -1,4 +1,4 @@
-import { getChaptersFromMarkdownContent } from "@src/text-extraction";
+import { getChaptersFromMarkdownContent } from "@src/text-extraction/webpage";
 import { getAudioForChapters } from "@src/text-to-speech";
 import { secsToMMSS } from "@src/utils/time";
 

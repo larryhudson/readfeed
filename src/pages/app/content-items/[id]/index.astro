@@ -21,7 +21,19 @@ if (contentItem.feed.userId !== userId) {
 
 <Layout>
   <h1>Content item: {contentItem.title}</h1>
-  <p>URL: <a href={contentItem.url}>{contentItem.url}</a></p>
+  {
+    contentItem.url && (
+      <p>
+        URL: <a href={contentItem.url}>{contentItem.url}</a>
+      </p>
+    )
+  }
+
+  {
+    contentItem.documentFile && (
+      <p>Document file: {contentItem.documentFile.title}</p>
+    )
+  }
 
   <p>
     <a href="./add-to-episode/">Create podcast episode with this content item</a
