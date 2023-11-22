@@ -1,0 +1,32 @@
+---
+import Layout from "@src/components/Layout.astro";
+import { getContentPartById, updateContentPartText } from "@src/content-items";
+
+const contentPartIdStr = Astro.params.id;
+const contentPartId = parseInt(contentPartIdStr, 10);
+
+let status;
+
+if (Astro.request.method === "POST") {
+    const formData = await Astro.request.formData();
+    const textContent = formData.get("text-content");
+
+    await updateContentPartText(contentPartId, textContent);
+    status = "Updated!";
+}
+
+const contentPart = await getContentPartById(contentPartId);
+---
+
+<Layout>
+    <h1>Updating content part text</h1>
+
+    <form method="POST">
+
+        <textarea name="text-content">{contentPart.textContent}</textarea>
+
+        <button>Save</button>
+    
+    </form>
+</Layout>
+

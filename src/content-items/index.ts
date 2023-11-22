@@ -34,6 +34,24 @@ export async function getContentItemById(contentItemId: number) {
   return contentItem;
 }
 
+export async function getContentPartById(contentPartId: number) {
+  const contentPart = await db.query.contentParts.findFirst({
+    where: (contentPartsTable, { eq }) =>
+      eq(contentPartsTable.id, contentPartId),
+  });
+  return contentPart;
+}
+
+export async function updateContentPartText(contentPartId, text) {
+  const updatedContentParts = await db
+    .update(contentPartsTable)
+    .set({ textContent: text })
+    .where(eq(contentPartsTable.id, contentPartId))
+    .returning();
+
+  return updatedContentParts[0];
+}
+
 export async function createContentItem(data: Partial<ContentItem>) {
   const contentItems = await db
     .insert(contentItemsTable)

@@ -40,7 +40,11 @@ if (contentItem.feed.userId !== userId) {
     >
   </p>
 
-  <h2>Text content</h2>
+  <h2>Content parts</h2>
+  <ul>
+    {contentItem.contentParts.map(contentPart => (
+      <li>{contentPart.title} <a href={`/app/content-parts/${contentPart.id}/edit`}>Edit</a></li>
+    ))}
 
   <button
     hx-post={`/app/content-items/${contentItemId}/x-fetch-text-content`}

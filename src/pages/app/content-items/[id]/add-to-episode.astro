@@ -58,6 +58,9 @@ if (contentItem.feed.userId !== userId) {
     <label>
       <select name="episode">
         <option value="">Create new</option>
+        {feedEpisodes.map((episode) => (
+          <option value={episode.id}>{episode.title}</option>
+        ))}
       </select>
     </label>
 
@@ -72,7 +75,7 @@ if (contentItem.feed.userId !== userId) {
         <p>
           <label>
             <input type="checkbox" checked="" name="parts[]" value={part.id} />{" "}
-            {part.title} (chars: {part.textContent.length})
+            {part.title} (chars: {part.textContent?.length})
           </label>
         </p>
       ))
