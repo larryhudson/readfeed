@@ -35,6 +35,14 @@ if (contentItem.feed.userId !== userId) {
     )
   }
 
+  {
+    contentItem.pdfExtractionJsonFilePath && (
+      <p>
+        <a href="tweak-pdf">Tweak PDF</a>
+      </p>
+    )
+  }
+
   <p>
     <a href="./add-to-episode/">Create podcast episode with this content item</a
     >
@@ -42,25 +50,31 @@ if (contentItem.feed.userId !== userId) {
 
   <h2>Content parts</h2>
   <ul>
-    {contentItem.contentParts.map(contentPart => (
-      <li>{contentPart.title} <a href={`/app/content-parts/${contentPart.id}/edit`}>Edit</a></li>
-    ))}
+    {
+      contentItem.contentParts.map((contentPart) => (
+        <li>
+          {contentPart.title}{" "}
+          <a href={`/app/content-parts/${contentPart.id}/edit`}>Edit</a>
+        </li>
+      ))
+    }
 
-  <button
-    hx-post={`/app/content-items/${contentItemId}/x-fetch-text-content`}
-    hx-target="#text-content"
-    hx-swap="innerHTML"
-    >{contentItem.textContent ? "Refetch content" : "Fetch content"}</button
-  >
+    <button
+      hx-post={`/app/content-items/${contentItemId}/x-fetch-text-content`}
+      hx-target="#text-content"
+      hx-swap="innerHTML"
+      >{contentItem.textContent ? "Refetch content" : "Fetch content"}</button
+    >
 
-  <div id="text-content">
-    {contentItem.textContent && contentItem.textContent}
-  </div>
-  <Debug {contentItem} />
+    <div id="text-content">
+      {contentItem.textContent && contentItem.textContent}
+    </div>
+    <Debug {contentItem} />
+  </ul>
+
+  <style>
+    #text-content {
+      white-space: pre-wrap;
+    }
+  </style>
 </Layout>
-
-<style>
-  #text-content {
-    white-space: pre-wrap;
-  }
-</style>

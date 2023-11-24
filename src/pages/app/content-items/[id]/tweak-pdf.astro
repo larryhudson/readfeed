@@ -1,0 +1,41 @@
+---
+import { Debug } from "astro:components";
+import Layout from "@src/components/Layout.astro";
+import PDFEditor from "@src/components/PDFEditor.svelte";
+
+import {
+  getContentItemById,
+  getContentPartsForContentItem,
+} from "@src/content-items";
+
+const contentItemIdStr = Astro.params.id;
+const contentItemId = parseInt(contentItemIdStr, 10);
+
+const session = await Astro.locals.auth.validate();
+const userId = session.user.userId;
+
+const contentItem = await getContentItemById(contentItemId);
+if (contentItem.feed.userId !== userId) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const pdfFilePath = contentItem.documentFile.filePath;
+const pdfDataPath = contentItem.pdfExtractionJsonFilePath;
+
+const pdfUrl = `/api/document-file/${contentItem.documentFileId}`;
+const pdfData = await fs.promises
+  .readFile(pdfDataPath, "utf-8")
+  .then(JSON.parse);
+---
+
+<Layout loadPdfJs="true">
+  <h1>Content item: {contentItem.title}</h1>
+
+  <Debug {pdfFilePath} />
+  <Debug {pdfDataPath} />
+
+  <h2>Tweak PDF</h2>
+  <PDFEditor client:only="svelte" {pdfUrl} {pdfData} />
+
+  <Debug {contentItem} />
+</Layout>

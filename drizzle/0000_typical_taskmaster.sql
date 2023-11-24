@@ -28,7 +28,7 @@ CREATE TABLE `content_item_audio_items` (
 CREATE TABLE `content_items` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`feed_id` integer,
-	`url` text NOT NULL,
+	`url` text,
 	`title` text,
 	`text_content` text,
 	`document_file_id` integer,

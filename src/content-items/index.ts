@@ -2,6 +2,7 @@ import { db } from "@src/db";
 import {
   contentItems as contentItemsTable,
   contentParts as contentPartsTable,
+  documentFiles as documentFilesTable,
   feeds as feedsTable,
 } from "@src/db/schema";
 
@@ -40,6 +41,21 @@ export async function getContentPartById(contentPartId: number) {
       eq(contentPartsTable.id, contentPartId),
   });
   return contentPart;
+}
+
+export async function getDocumentFileById(documentFileId: number) {
+  const documentFile = await db.query.documentFiles.findFirst({
+    where: (documentFilesTable, { eq }) =>
+      eq(documentFilesTable.id, documentFileId),
+    with: {
+      contentItem: {
+        with: {
+          feed: true,
+        },
+      },
+    },
+  });
+  return documentFile;
 }
 
 export async function updateContentPartText(contentPartId, text) {

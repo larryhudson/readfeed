@@ -43,6 +43,13 @@
       "when": 1700516553558,
       "tag": "0005_giant_captain_flint",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1700861925166,
+      "tag": "0006_petite_legion",
+      "breakpoints": true
     }
   ]
 }

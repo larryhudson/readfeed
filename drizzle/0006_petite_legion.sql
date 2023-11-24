@@ -1,0 +1,1 @@
+ALTER TABLE content_items ADD `pdf_extraction_json_file_path` text;

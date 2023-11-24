@@ -15,7 +15,10 @@ export async function extractChaptersFromDocument(job) {
     jobId: job.id,
   });
 
-  const textParts = await extractChaptersFromDoc(documentFilePath);
+  const textParts = await extractChaptersFromDoc(
+    documentFilePath,
+    contentItemId,
+  );
 
   const textPartValues = textParts.map((textPart, index) => {
     return {

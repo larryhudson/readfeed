@@ -91,6 +91,7 @@ export const contentItems = sqliteTable("content_items", {
     sql`CURRENT_TIMESTAMP`,
   ),
   jobId: integer("job_id"),
+  pdfExtractionJsonFilePath: text("pdf_extraction_json_file_path"),
 });
 
 export const contentItemRelations = relations(
@@ -137,6 +138,13 @@ export const documentFiles = sqliteTable("document_files", {
   ),
   filePath: text("file_path"),
 });
+
+export const documentFileRelations = relations(documentFiles, ({ one }) => ({
+  contentItem: one(contentItems, {
+    fields: [documentFiles.id],
+    references: [contentItems.documentFileId],
+  }),
+}));
 
 export const audioItems = sqliteTable("audio_items", {
   id: integer("id").primaryKey(),
