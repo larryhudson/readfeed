@@ -18,11 +18,12 @@
   let file;
   let dragging = false;
   let startX, startY;
-  let selectedParagraph = null;
+  let selectedIds = [];
   let translateX = 0,
     translateY = 0;
   let isReadyToOrder = false;
   let isOrdering = false;
+  let holdingCtrl = false;
 
   let hoverTimeout;
   let currentOrderIndex = 1;
@@ -40,6 +41,10 @@
 
   async function renderPdfPage() {
     if (!pdfDocument) return;
+    console.log("Rendering page", currentPage);
+    const pdfPageData = pdfData[currentPage - 1];
+    console.log("Page data");
+    console.log(pdfPageData);
     const page = await pdfDocument.getPage(currentPage);
     const viewport = page.getViewport({ scale });
     const context = canvas.getContext("2d");
@@ -52,11 +57,18 @@
     };
     page.render(renderContext);
 
-    const paragraphsForPage = pdfData[currentPage - 1].paragraphs;
+    const pageToRender = pdfData[currentPage - 1]
+    if (pageToRender && pageToRender.modified) {
+      paragraphs.set(
+        pageToRender.paragraphs
+      );
+    } else {
+      const paragraphsForPage = pageToRender.paragraphs;
     const paragraphCoords = transformParagraphData(paragraphsForPage);
     paragraphs.set(
       paragraphCoords.map((p, index) => ({ ...p, order: index + 1 })),
     );
+    }
   }
 
   function startPan(event) {
@@ -175,16 +187,20 @@
   }
 
   function setParagraphTag(tag) {
-    const id = selectedParagraph;
     // this feels like React :(
     paragraphs.update((items) => {
       return items.map((item) => {
-        if (item.id === id) {
+        if (selectedIds.includes(item.id)) {
           return { ...item, tag };
         }
         return item;
       });
     });
+    // update paragraphs in pdfData
+    pdfData[currentPage - 1].paragraphs = $paragraphs;
+    pdfData[currentPage - 1].modified = true;
+    pdfData = [...pdfData];
+    console.log(pdfData);
   }
 
   async function extractContent() {
@@ -204,6 +220,38 @@
     );
   }
 
+  function handleKeydown(event) {
+    if (event.key === "Control") {
+      holdingCtrl = true;
+    }
+  }
+
+  function handleKeyup(event) {
+    if (event.key === "Control") {
+      holdingCtrl = false;
+    }
+  }
+
+  async function savePdfData() {
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(pdfData,null,2));
+
+    const response = await fetch("/api/tweak-pdf/save", {
+      body: JSON.stringify(pdfData,null,2),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+
+
+    if (response.ok) {
+      console.log("Saved PDF data");
+    } else {
+      console.log("Failed to save PDF data");
+    }
+  }
+
   $: currentPage, renderPdfPage(); // Re-render when currentPage changes
 </script>
 
@@ -217,12 +265,12 @@
       isReadyToOrder = !isReadyToOrder;
     }}>{isReadyToOrder ? "Stop ordering" : "Set order"}</button
   >
-  <button on:click={() => setParagraphTag("h1")} disabled={!selectedParagraph}
+  <button on:click={() => setParagraphTag("h1")} disabled={selectedIds.length === 0}
     >H1</button
   >
-  <button on:click={() => setParagraphTag("h2")} disabled={!selectedParagraph}
-    >H2</button
-  >
+  <button on:click={() => setParagraphTag("h2")} disabled={selectedIds.length === 0}
+    >H2</button>
+  <button on:click={() => setParagraphTag("artifact")} disabled={selectedIds.length === 0}>Artifact</button>
 </div>
 
 <div
@@ -231,7 +279,9 @@
   on:mousemove={doPanOrOrder}
   on:mouseup={endPanOrOrder}
   on:wheel={handleWheel}
-  on:click={() => (selectedParagraph = null)}
+  on:keydown={handleKeydown}
+  on:keyup={handleKeyup}
+  on:click={() => (selectedIds = [])}
   class:dragging
 >
   <canvas
@@ -242,11 +292,15 @@
   {#each $paragraphs as coord (coord.id)}
     <button
       on:click={(event) => {
-        selectedParagraph = coord.id;
+        if (holdingCtrl) {
+          selectedIds = [...selectedIds, coord.id]
+        } else {
+          selectedIds = [coord.id];
+        }
         event.stopPropagation();
       }}
       on:mouseover={() => handleHover(coord)}
-      class:selected={selectedParagraph === coord.id}
+      class:selected={selectedIds.includes(coord.id)}
       class="interactive-box button-reset tag-{coord.tag}"
       style="left: {coord.x * scale + translateX}px; top: {coord.y * scale +
         translateY}px; width: {coord.width * scale}px; height: {coord.height *
@@ -261,6 +315,7 @@
 <button on:click={nextPage} disabled={currentPage >= numPages}>Next Page</button
 >
 <button on:click={extractContent}>Extract Content</button>
+<button on:click={savePdfData}>Save PDF data</button>
 
 <style>
   .pdf-container {
@@ -295,5 +350,9 @@
   .interactive-box.selected {
     border: 4px solid blue;
     background-color: rgba(0, 0, 255, 0.5);
+  }
+
+  .interactive-box.tag-artifact {
+    background-color: rgba(0,0,0, 0.5);
   }
 </style>
