@@ -91,7 +91,6 @@ export const contentItems = sqliteTable("content_items", {
     sql`CURRENT_TIMESTAMP`,
   ),
   jobId: integer("job_id"),
-  pdfExtractionJsonFilePath: text("pdf_extraction_json_file_path"),
 });
 
 export const contentItemRelations = relations(
@@ -137,6 +136,8 @@ export const documentFiles = sqliteTable("document_files", {
     sql`CURRENT_TIMESTAMP`,
   ),
   filePath: text("file_path"),
+  pdfDataOriginalFilePath: text("pdf_data_original_file_path"),
+  pdfDataFilePath: text("pdf_data_file_path"),
 });
 
 export const documentFileRelations = relations(documentFiles, ({ one }) => ({
@@ -211,4 +212,5 @@ export type WaitlistUser = InferSelectModel<typeof waitlistUsers>;
 export type WaitlistInvitation = InferSelectModel<typeof waitlistInvitations>;
 export type Feed = InferSelectModel<typeof feeds>;
 export type ContentItem = InferSelectModel<typeof contentItems>;
+export type DocumentFile = InferSelectModel<typeof documentFiles>;
 export type AudioItem = InferSelectModel<typeof audioItems>;

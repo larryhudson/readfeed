@@ -1,21 +1,19 @@
-import { getDocumentFileById } from "@src/content-items";
+import { getContentItemById } from "@src/content-items";
 import fs from "fs";
 
 export const GET = async (context) => {
-  const documentFileId = context.params.id;
+  const contentItemId = context.params.id;
 
-  const documentFile = await getDocumentFileById(documentFileId);
-  console.log("Document file");
-  console.log(documentFile);
+  const contentItem = await getContentItemById(contentItemId);
 
   const session = await context.locals.auth.validate();
   const userId = session.user.userId;
 
-  if (documentFile.contentItem.feed.userId !== userId) {
+  if (contentItem.feed.userId !== userId) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const documentFilePath = documentFile.filePath;
+  const documentFilePath = contentItem.documentFile.filePath;
 
   const mimeTypeByExtension = {
     pdf: "application/pdf",

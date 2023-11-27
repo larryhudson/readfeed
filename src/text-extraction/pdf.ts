@@ -6,34 +6,47 @@ import pMap from "p-map";
 import fs from "fs";
 import path from "path";
 import * as pdfjs from "pdfjs-dist";
-import { updateContentItem } from "@src/content-items";
+import { updateDocumentFile } from "@src/content-items";
 import { PDFDocument } from "pdf-lib";
 import { Readable } from "stream";
 
 export async function extractChaptersFromPdf(
   pdfFilePath: string,
-  contentItemId: number,
+  documentFileId: number,
 ) {
   console.log("Extracting chapters from PDF");
   console.log("File path:", pdfFilePath);
-  console.log("Content item id:", contentItemId);
+  console.log("Document file id:", documentFileId);
   // try to extract bookmarks from PDF - if it has bookmarks, use those to split the document into parts
   const pdfPages = await extractTextFromPdf(pdfFilePath);
 
   // save JSON file
   const timestamp = Date.now();
-  const jsonFilename = `contentItem-${contentItemId}_${timestamp}.json`;
-  const pdfExtractionJsonFolderPath = "./media/pdf-extraction-json";
-  const jsonFilePath = path.join(pdfExtractionJsonFolderPath, jsonFilename);
+
+  // save two copies of the JSON file - one that can be modified, and one that is the original
+  const originalJsonFilename = `documentFile-${documentFileId}_${timestamp}_original.json`;
+  const modifiableJsonFilename = `documentFile-${documentFileId}.json`;
+  const pdfExtractionJsonFolderPath = "./media/pdf-extraction-data";
+  const originalJsonFilePath = path.join(
+    pdfExtractionJsonFolderPath,
+    originalJsonFilename,
+  );
+  const modifiableJsonFilePath = path.join(
+    pdfExtractionJsonFolderPath,
+    modifiableJsonFilename,
+  );
   if (!fs.existsSync(pdfExtractionJsonFolderPath)) {
     fs.mkdirSync(pdfExtractionJsonFolderPath, { recursive: true });
   }
 
-  await fs.promises.writeFile(jsonFilePath, JSON.stringify(pdfPages, null, 2));
+  const jsonString = JSON.stringify(pdfPages, null, 2);
+  await fs.promises.writeFile(originalJsonFilePath, jsonString);
+  await fs.promises.writeFile(modifiableJsonFilePath, jsonString);
 
-  // save the json file path to the content item
-  await updateContentItem(contentItemId, {
-    pdfExtractionJsonFilePath: jsonFilePath,
+  // save the json file path to the document file item
+  await updateDocumentFile(documentFileId, {
+    pdfDataOriginalFilePath: originalJsonFilePath,
+    pdfDataFilePath: modifiableJsonFilePath,
   });
 
   const chapters = pdfPages.map((page, index) => {
@@ -135,4 +148,3 @@ async function extractTextFromPdf(pdfPath: string) {
 
   return pdfPages;
 }
-

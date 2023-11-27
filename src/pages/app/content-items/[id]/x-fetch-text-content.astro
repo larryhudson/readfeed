@@ -18,7 +18,7 @@ if (contentItem.feed.userId !== userId) {
 if (contentItem.documentFile) {
   const job = await addTaskToQueue({
     taskName: "extractChaptersFromDocument",
-    taskData: { contentItemId },
+    taskData: { contentItemId, documentFileId: contentItem.documentFile.id },
   });
   return;
 }

@@ -6,7 +6,7 @@ import {
   feeds as feedsTable,
 } from "@src/db/schema";
 
-import type { ContentItem } from "@src/db/schema";
+import type { ContentItem, DocumentFile } from "@src/db/schema";
 import { eq, and } from "drizzle-orm";
 
 export async function getContentItemsForFeed(feedId: number) {
@@ -88,6 +88,19 @@ export async function updateContentItem(
     .where(and(eq(contentItemsTable.id, contentItemId)));
   const updatedContentItem = updatedContentItems[0];
   return updatedContentItem;
+}
+
+export async function updateDocumentFile(
+  documentFileId: number,
+  data: Partial<DocumentFile>,
+) {
+  console.log({ documentFileId, data });
+  const updatedDocumentFiles = await db
+    .update(documentFilesTable)
+    .set(data)
+    .where(and(eq(documentFilesTable.id, documentFileId)));
+  const updatedDocumentFile = updatedDocumentFiles[0];
+  return updatedDocumentFile;
 }
 
 type ContentPartInsert = {

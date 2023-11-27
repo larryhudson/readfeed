@@ -57,17 +57,15 @@
     };
     page.render(renderContext);
 
-    const pageToRender = pdfData[currentPage - 1]
+    const pageToRender = pdfData[currentPage - 1];
     if (pageToRender && pageToRender.modified) {
-      paragraphs.set(
-        pageToRender.paragraphs
-      );
+      paragraphs.set(pageToRender.paragraphs);
     } else {
       const paragraphsForPage = pageToRender.paragraphs;
-    const paragraphCoords = transformParagraphData(paragraphsForPage);
-    paragraphs.set(
-      paragraphCoords.map((p, index) => ({ ...p, order: index + 1 })),
-    );
+      const paragraphCoords = transformParagraphData(paragraphsForPage);
+      paragraphs.set(
+        paragraphCoords.map((p, index) => ({ ...p, order: index + 1 })),
+      );
     }
   }
 
@@ -234,16 +232,17 @@
 
   async function savePdfData() {
     const formData = new FormData();
-    formData.append("data", JSON.stringify(pdfData,null,2));
+    formData.append("data", JSON.stringify(pdfData, null, 2));
 
-    const response = await fetch("/api/tweak-pdf/save", {
-      body: JSON.stringify(pdfData,null,2),
+    const saveUrl = "./save";
+
+    const response = await fetch(saveUrl, {
+      body: JSON.stringify(pdfData, null, 2),
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-      }
+      },
     });
-
 
     if (response.ok) {
       console.log("Saved PDF data");
@@ -265,12 +264,18 @@
       isReadyToOrder = !isReadyToOrder;
     }}>{isReadyToOrder ? "Stop ordering" : "Set order"}</button
   >
-  <button on:click={() => setParagraphTag("h1")} disabled={selectedIds.length === 0}
-    >H1</button
+  <button
+    on:click={() => setParagraphTag("h1")}
+    disabled={selectedIds.length === 0}>H1</button
   >
-  <button on:click={() => setParagraphTag("h2")} disabled={selectedIds.length === 0}
-    >H2</button>
-  <button on:click={() => setParagraphTag("artifact")} disabled={selectedIds.length === 0}>Artifact</button>
+  <button
+    on:click={() => setParagraphTag("h2")}
+    disabled={selectedIds.length === 0}>H2</button
+  >
+  <button
+    on:click={() => setParagraphTag("artifact")}
+    disabled={selectedIds.length === 0}>Artifact</button
+  >
 </div>
 
 <div
@@ -293,7 +298,7 @@
     <button
       on:click={(event) => {
         if (holdingCtrl) {
-          selectedIds = [...selectedIds, coord.id]
+          selectedIds = [...selectedIds, coord.id];
         } else {
           selectedIds = [coord.id];
         }
@@ -353,6 +358,6 @@
   }
 
   .interactive-box.tag-artifact {
-    background-color: rgba(0,0,0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
   }
 </style>

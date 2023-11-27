@@ -3,7 +3,7 @@ import { extractChaptersFromPdf } from "./pdf";
 import { extractChaptersFromDocx } from "./docx";
 import path from "node:path";
 
-export async function extractChaptersFromDoc(documentPath, contentItemId) {
+export async function extractChaptersFromDoc(documentPath, documentFileId) {
   const fileType = path.extname(documentPath).slice(1);
 
   const extractorByFileType = {
@@ -18,6 +18,6 @@ export async function extractChaptersFromDoc(documentPath, contentItemId) {
     throw new Error("No handler for file type", fileType);
   }
 
-  const chapters = await extractorFunction(documentPath, contentItemId);
+  const chapters = await extractorFunction(documentPath, documentFileId);
   return chapters;
 }

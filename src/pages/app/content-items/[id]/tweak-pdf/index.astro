@@ -2,6 +2,7 @@
 import { Debug } from "astro:components";
 import Layout from "@src/components/Layout.astro";
 import PDFEditor from "@src/components/PDFEditor.svelte";
+import fs from "fs";
 
 import {
   getContentItemById,
@@ -20,9 +21,10 @@ if (contentItem.feed.userId !== userId) {
 }
 
 const pdfFilePath = contentItem.documentFile.filePath;
-const pdfDataPath = contentItem.pdfExtractionJsonFilePath;
+const pdfDataPath = contentItem.documentFile.pdfDataFilePath;
 
-const pdfUrl = `/api/document-file/${contentItem.documentFileId}`;
+// relative url to download pdf - maybe a bad idea?
+const pdfUrl = `./download-pdf`;
 const pdfData = await fs.promises
   .readFile(pdfDataPath, "utf-8")
   .then(JSON.parse);
