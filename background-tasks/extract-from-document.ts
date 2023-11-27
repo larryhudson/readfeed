@@ -9,6 +9,7 @@ export async function extractChaptersFromDocument(job) {
   const { contentItemId } = job.data;
   const contentItem = await getContentItemById(contentItemId);
   const documentFilePath = contentItem.documentFile.filePath;
+  const documentFileId = contentItem.documentFile.id;
 
   // add the job id to the content item
   await updateContentItem(contentItemId, {
@@ -17,7 +18,7 @@ export async function extractChaptersFromDocument(job) {
 
   const textParts = await extractChaptersFromDoc(
     documentFilePath,
-    contentItemId,
+    documentFileId,
   );
 
   const textPartValues = textParts.map((textPart, index) => {
