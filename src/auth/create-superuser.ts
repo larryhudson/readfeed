@@ -1,10 +1,13 @@
 import { auth } from "@src/auth/lucia";
 
 export async function createSuperuser() {
-  const ADMIN_NAME = import.meta.env.ADMIN_NAME as string;
-  const ADMIN_EMAIL = import.meta.env.ADMIN_EMAIL as string;
-  const ADMIN_PASSWORD = import.meta.env.ADMIN_PASSWORD as string;
+  const ADMIN_NAME = import.meta?.env?.ADMIN_NAME || process.env.ADMIN_NAME;
+  const ADMIN_EMAIL = import.meta?.env?.ADMIN_EMAIL || process.env.ADMIN_EMAIL;
+  const ADMIN_PASSWORD =
+    import.meta?.env?.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+  console.log(process.env);
   console.log("Creating user with email", ADMIN_EMAIL);
+  console.log("Creating user with password", ADMIN_PASSWORD);
 
   const user = await auth.createUser({
     key: {

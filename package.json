@@ -8,6 +8,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "queue": "npx tsx consume-tasks.ts",
+    "create-superuser": "npx tsx create-superuser.ts",
+    "delete-db": "rm -rf sqlite.db && rm -rf media/*",
     "drizzle:push": "drizzle-kit push:sqlite",
     "drizzle:generate": "drizzle-kit generate:sqlite",
     "drizzle:migrate": "node drizzle-migrate.js"

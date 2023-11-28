@@ -10,7 +10,7 @@ export const auth = lucia({
     key: "user_keys",
   }),
   middleware: astro(),
-  env: import.meta.env.DEV ? "DEV" : "PROD",
+  env: import.meta?.env?.DEV ? "DEV" : "PROD",
   getUserAttributes: (data) => {
     return {
       name: data.name,
