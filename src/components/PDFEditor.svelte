@@ -251,6 +251,20 @@
     }
   }
 
+  async function updateContentParts() {
+    const saveUrl = "./update-content-parts";
+
+    const response = await fetch(saveUrl, {
+      method: "POST",
+    });
+
+    if (response.ok) {
+      console.log("Updated content parts");
+    } else {
+      console.log("Failed to update content parts");
+    }
+  }
+
   $: currentPage, renderPdfPage(); // Re-render when currentPage changes
 </script>
 
@@ -321,6 +335,7 @@
 >
 <button on:click={extractContent}>Extract Content</button>
 <button on:click={savePdfData}>Save PDF data</button>
+<button on:click={updateContentParts}>Update content parts</button>
 
 <style>
   .pdf-container {
@@ -329,6 +344,7 @@
     position: relative;
     overflow: hidden; /* This will clip the overflow */
     border: 2px solid black;
+    background-color: lightgray;
   }
 
   .pdf-container.dragging {

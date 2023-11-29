@@ -139,6 +139,14 @@ export async function createContentPart({
   return contentPart;
 }
 
+export async function deleteContentPartsForContentItem(contentItemId) {
+  const deleted = await db
+    .delete(contentPartsTable)
+    .where(eq(contentPartsTable.contentItemId, contentItemId));
+
+  return deleted;
+}
+
 export async function getContentPartsForContentItem(contentItemId) {
   const contentParts = await db
     .select()

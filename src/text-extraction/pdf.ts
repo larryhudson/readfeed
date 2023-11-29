@@ -69,6 +69,26 @@ export async function getPdfPageCount(pdfFilePath: string) {
   return pdf.numPages;
 }
 
+export async function getBookmarksFromPdf(pdfFilePath: string) {
+  // use pdfjs-dist to get the bookmarks
+  console.log("Getting bookmarks for PDF");
+  console.log("File path", pdfFilePath);
+  const pdf = await pdfjs.getDocument(pdfFilePath).promise;
+  console.log("PDF data");
+  console.log(pdf);
+  const outline = await pdf.getOutline();
+  console.log("Outline");
+  console.log(outline);
+  // return an array of bookmarks - each one should have a title and a page number
+  const bookmarks = outline.map((bookmark) => {
+    return {
+      title: bookmark.title,
+      pageNumber: bookmark.dest[0],
+    };
+  });
+  return bookmarks;
+}
+
 async function splitPdfIntoPages(pdfPath) {
   // Read the existing PDF
   const existingPdfBytes = fs.readFileSync(pdfPath);
@@ -78,6 +98,14 @@ async function splitPdfIntoPages(pdfPath) {
 
   // Get the total number of pages
   const pageCount = pdfDoc.getPageCount();
+
+  const maxNumPages = 20;
+
+  if (pageCount > maxNumPages) {
+    throw new Error(
+      `PDF has ${pageCount} pages, which is more than the maximum number of pages allowed (${maxNumPages})`,
+    );
+  }
 
   // Array to hold streams
   const pageBuffers = [];
@@ -147,4 +175,28 @@ async function extractTextFromPdf(pdfPath: string) {
   );
 
   return pdfPages;
+}
+
+export async function extractPartsFromPdfData(pdfData) {
+  // this is the pdf data that comes from Azure Documeent Intelligence API
+  // it comes as an array of pages
+  const pages = pdfData;
+
+  // each page has a list of paragraphs. we want to filter out the ones that have 'tag: artifact' on them
+  const parts = pages.map((page, pageIndex) => {
+    console.log(page.paragraphs);
+    const paragraphs = page.paragraphs.filter((paragraph) => {
+      return paragraph.tag !== "artifact";
+    });
+
+    const paragraphStrings = paragraphs.map((paragraph) => {
+      return paragraph.content;
+    });
+
+    const pageText = paragraphStrings.join("\n\n");
+
+    return { title: `Page ${pageIndex + 1}`, textContent: pageText };
+  });
+
+  return parts;
 }
