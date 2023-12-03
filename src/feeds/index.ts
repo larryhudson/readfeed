@@ -23,3 +23,16 @@ export async function getFeedByIdForUser(userId, feedId) {
 
   return feed;
 }
+
+export async function getFeedById(feedId) {
+  const feed = await db.query.feeds.findFirst({
+    where: (feedsTable, { eq }) => eq(feedsTable.id, feedId),
+    with: {
+      user: true,
+      contentItems: true,
+      audioItems: true,
+    },
+  });
+
+  return feed;
+}
